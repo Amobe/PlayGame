@@ -1,4 +1,4 @@
-package equipment
+package character
 
 type Equipment struct {
 	MajorHand Weapon
@@ -56,20 +56,6 @@ const (
 	WeaponSlotBothHand  WeaponSlot = "both_hand"
 )
 
-type Attribute struct {
-	ValueType AttributeValueType
-	Value     string
-}
-
-type AttributeValueType string
-
-const (
-	AttributeValueTypeATK  AttributeValueType = "atk"
-	AttributeValueTypeDEF  AttributeValueType = "def"
-	AttributeValueTypeMATK AttributeValueType = "matk"
-	AttributeValueTypeMDEF AttributeValueType = "mdef"
-)
-
 type Suite struct {
 	ID         string
 	Name       string
@@ -82,19 +68,19 @@ var EmptyWeapon = Weapon{"60dad481-527d-4132-bf2f-7e8eab8ce136", "MajorEmpty", W
 var WeaponSet = map[string]Weapon{
 	"Empty": EmptyWeapon,
 	"Knife": {"4b3867ab-e54d-4f34-a014-c2f87e1906f5", "Knife", WeaponSlotMajorHand, []Attribute{
-		{AttributeValueTypeATK, "10"},
+		{AttributeTypeATK, "10"},
 	}},
 	"Shield": {"de977351-4a5f-4559-8b0c-ff09337a979d", "Shield", WeaponSlotMinorHand, []Attribute{
-		{AttributeValueTypeDEF, "10"},
+		{AttributeTypeDEF, "10"},
 	}},
 	"Book": {"c578dbe6-9758-4c4b-a9f4-22e577a2b9bb", "Book", WeaponSlotMajorHand, []Attribute{
-		{AttributeValueTypeMATK, "10"},
+		{AttributeTypeMATK, "10"},
 	}},
 	"Ball": {"d8a7a657-fb7a-4ce9-83b9-f2a833032dc0", "Ball", WeaponSlotMinorHand, []Attribute{
-		{AttributeValueTypeMDEF, "10"},
+		{AttributeTypeMDEF, "10"},
 	}},
 	"Axe": {"be52ce42-2a8e-4324-b84b-fbad5761f586", "Axe", WeaponSlotBothHand, []Attribute{
-		{AttributeValueTypeATK, "25"},
+		{AttributeTypeATK, "25"},
 	}},
 }
 
@@ -105,15 +91,15 @@ var SuiteSet = map[string]Suite{
 	"Physical": {"87d1454d-c5b9-48c3-9928-1a9e003ee9c6", "Physical",
 		[]string{"Knife", "Shield"},
 		[]Attribute{
-			{AttributeValueTypeATK, "10"},
-			{AttributeValueTypeDEF, "10"},
+			{AttributeTypeATK, "10"},
+			{AttributeTypeDEF, "10"},
 		},
 	},
 	"Magical": {"09a2b7e8-2943-493b-bc48-3d413e969bca", "Magical",
 		[]string{"Book", "Ball"},
 		[]Attribute{
-			{AttributeValueTypeMATK, "10"},
-			{AttributeValueTypeMDEF, "10"},
+			{AttributeTypeMATK, "10"},
+			{AttributeTypeMDEF, "10"},
 		},
 	},
 }
