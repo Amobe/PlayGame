@@ -8,26 +8,22 @@ import (
 )
 
 func act(actor, target character.Character, skill character.Skill) (affectedActor, affectedTarget character.Character) {
-	aa, ta := skill.Affect(actor.GetAttributeMap(), target.GetAttributeMap())
+	aa, ta := skill.Use(actor.GetAttributeMap(), target.GetAttributeMap())
 	actor.Affect(aa)
 	target.Affect(ta)
 	return actor, target
 }
 
+type skillTest struct{}
+
+func (s skillTest) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
+	return nil, []character.Attribute{{character.AttributeTypeHP, "-100"}}
+}
+
 func TestAct(t *testing.T) {
 	attacker := character.NewCharacter()
 	defender := character.NewCharacter()
-	skill := character.Skill{
-		Affect: func(attacker, defender character.AttributeTypeMap) ([]character.Attribute, []character.Attribute) {
-			da := []character.Attribute{
-				{
-					Type:  character.AttributeTypeHP,
-					Value: "-100",
-				},
-			}
-			return nil, da
-		},
-	}
+	skill := skillTest{}
 
 	wantAttacker := character.NewCharacter()
 	wantDefender := character.Character{

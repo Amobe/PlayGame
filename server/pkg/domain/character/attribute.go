@@ -15,6 +15,14 @@ func (a Attribute) GetInt() int {
 	return int(value)
 }
 
+func (a Attribute) GetFloat() float64 {
+	value, err := strconv.ParseFloat(a.Value, 64)
+	if err != nil {
+		return 0
+	}
+	return value
+}
+
 func (a *Attribute) Add(value int) {
 	res := a.GetInt() + value
 	a.Value = strconv.Itoa(res)
@@ -23,14 +31,26 @@ func (a *Attribute) Add(value int) {
 type AttributeType string
 
 const (
-	AttributeTypeHP   AttributeType = "hp"
-	AttributeTypeAGI  AttributeType = "agi"
-	AttributeTypeATK  AttributeType = "atk"
-	AttributeTypeDEF  AttributeType = "def"
-	AttributeTypeMATK AttributeType = "matk"
-	AttributeTypeMDEF AttributeType = "mdef"
+	AttributeTypeHP       AttributeType = "hp"
+	AttributeTypeAGI      AttributeType = "agi"
+	AttributeTypeATK      AttributeType = "atk"
+	AttributeTypeDEF      AttributeType = "def"
+	AttributeTypeMATK     AttributeType = "matk"
+	AttributeTypeMDEF     AttributeType = "mdef"
+	AttributeTypeCRI      AttributeType = "cri"
+	AttributeTypeCRIR     AttributeType = "crir"
+	AttributeTypeCRID     AttributeType = "crid"
+	AttributeTypeCRIDR    AttributeType = "cridr"
+	AttributeTypeAMP      AttributeType = "amp"
+	AttributeTypeAMPR     AttributeType = "ampr"
+	AttributeTypeStatusH  AttributeType = "sh"  // status hit rate
+	AttributeTypeStatusHR AttributeType = "shr" // status hit resist
+	AttributeTypeDI       AttributeType = "di"  // damage increase
+	AttributeTypeDR       AttributeType = "dr"  // damage reduce
+	AttributeTypeSDR      AttributeType = "sdr" // skill damage rate
 
-	AttributeTypeDead AttributeType = "dead"
+	AttributeTypeDead     AttributeType = "dead"
+	AttributeTypePoisoned AttributeType = "poisoned"
 )
 
 type AttributeTypeMap map[AttributeType]Attribute
