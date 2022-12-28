@@ -108,11 +108,8 @@ func criticalDamageFactor(cri, criR, sCri, criD, criDR float64) float64 {
 		return 1
 	}
 	criticalFactor := 1 + criD - criDR
-	if criticalFactor > 1.25 {
+	if criticalFactor < 1.25 {
 		return 1.25
-	}
-	if criticalFactor < 1 {
-		return 1
 	}
 	return criticalFactor
 }
