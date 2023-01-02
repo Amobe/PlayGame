@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package game.v1;
+
+option go_package = "github.com/Amobe/PlayGame/server/gen/proto/go/game/v1;gamev1";
+
+service GameService {
+  rpc NewBattle(NewBattleRequest) returns (NewBattleResponse) {}
+  rpc Fight(FightRequest) returns (FightResponse) {}
+}
+
+message NewBattleRequest {}
+
+message NewBattleResponse {}
+
+message FightRequest {}
+
+message FightResponse {}
