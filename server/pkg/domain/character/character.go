@@ -50,5 +50,11 @@ func (c *Character) Affect(attr []Attribute) {
 	}
 }
 
+func (c *Character) UseSkill(skill Skill, targetAttr AttributeTypeMap) (targetAffect []Attribute) {
+	affect, targetAffect := skill.Use(c.GetAttributeMap(), targetAttr)
+	c.Affect(affect)
+	return targetAffect
+}
+
 type CharacterEventDefensed struct {
 }
