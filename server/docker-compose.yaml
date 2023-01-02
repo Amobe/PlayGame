@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  game_service:
+    restart: always
+    image: playgame/server:v1
+    networks:
+      - game_app_network
+    ports:
+      - "8080:8080"
+networks:
+  game_app_network:
+    name: game_app_network
+    driver: bridge
