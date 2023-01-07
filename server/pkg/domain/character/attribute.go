@@ -1,6 +1,8 @@
 package character
 
-import "strconv"
+import (
+	"strconv"
+)
 
 type Attribute struct {
 	Type  AttributeType

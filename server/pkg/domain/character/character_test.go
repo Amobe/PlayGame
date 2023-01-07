@@ -3,8 +3,9 @@ package character_test
 import (
 	"testing"
 
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 )
 
 func act(actor, target character.Character, skill character.Skill) (affectedActor, affectedTarget character.Character) {
@@ -16,14 +17,18 @@ func act(actor, target character.Character, skill character.Skill) (affectedActo
 
 type skillTest struct{}
 
-func (s skillTest) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
+func (s *skillTest) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
 	return nil, []character.Attribute{{character.AttributeTypeHP, "-100"}}
+}
+
+func (s *skillTest) Name() string {
+	return "skillTest"
 }
 
 func TestAct(t *testing.T) {
 	attacker := character.NewCharacter()
 	defender := character.NewCharacter()
-	skill := skillTest{}
+	skill := &skillTest{}
 
 	wantAttacker := character.NewCharacter()
 	wantDefender := character.Character{

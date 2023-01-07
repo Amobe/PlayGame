@@ -8,12 +8,17 @@ import (
 
 type Skill interface {
 	Use(am, dm AttributeTypeMap) (aa, ta []Attribute)
+	Name() string
 }
 
 type skill struct {
 	SkillID      string
-	Name         string
+	name         string
 	AttributeMap AttributeTypeMap
+}
+
+func (s skill) Name() string {
+	return s.name
 }
 
 type SkillPoisonHit struct {
@@ -27,7 +32,7 @@ func NewSkillPoisonHit() SkillPoisonHit {
 	return SkillPoisonHit{
 		skill: skill{
 			SkillID:      "poisonHit",
-			Name:         "poisonHit",
+			name:         "poisonHit",
 			AttributeMap: am,
 		},
 	}

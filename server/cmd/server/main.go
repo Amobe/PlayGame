@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
@@ -9,6 +8,11 @@ import (
 	"google.golang.org/grpc"
 
 	gamev1 "github.com/Amobe/PlayGame/server/gen/proto/go/game/v1"
+	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
+	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
+	"github.com/Amobe/PlayGame/server/pkg/infra/inmem"
+	"github.com/Amobe/PlayGame/server/pkg/interfaces/gamegrpc"
 )
 
 func main() {
@@ -24,8 +28,15 @@ func run() error {
 		return fmt.Errorf("listen on %s: %w", listenOn, err)
 	}
 
+	deps := deps{
+		characterRepo: inmem.NewInmemCharacterRepository(),
+		stageRepo:     inmem.NewInmemStageRepository(),
+		battleRepo:    inmem.NewInmemBattleRepository(),
+	}
+
 	server := grpc.NewServer()
-	gamev1.RegisterGameServiceServer(server, &GameServiceServer{})
+	handler := gamegrpc.NewGameServiceHandler(deps)
+	gamev1.RegisterGameServiceServer(server, handler)
 	log.Println("Listening on", listenOn)
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("serve gRPC server: %w", err)
@@ -34,16 +45,20 @@ func run() error {
 	return nil
 }
 
-type GameServiceServer struct {
-	gamev1.UnimplementedGameServiceServer
+type deps struct {
+	characterRepo character.Repository
+	stageRepo     stage.Repository
+	battleRepo    battle.Repository
 }
 
-func (s *GameServiceServer) NewBattle(ctx context.Context, req *gamev1.NewBattleRequest) (*gamev1.NewBattleResponse, error) {
-	log.Println("NewBattle")
-	return &gamev1.NewBattleResponse{}, nil
+func (d deps) CharacterRepo() character.Repository {
+	return d.characterRepo
 }
 
-func (s *GameServiceServer) Fight(ctx context.Context, req *gamev1.FightRequest) (*gamev1.FightResponse, error) {
-	log.Println("Fight")
-	return &gamev1.FightResponse{}, nil
+func (d deps) StageRepo() stage.Repository {
+	return d.stageRepo
+}
+
+func (d deps) BattleRepo() battle.Repository {
+	return d.battleRepo
 }

@@ -11,8 +11,26 @@ service GameService {
 
 message NewBattleRequest {}
 
-message NewBattleResponse {}
+message NewBattleResponse {
+  string battle_id = 1;
+}
 
-message FightRequest {}
+message FightRequest {
+  string battle_id = 1;
+}
 
-message FightResponse {}
+message FightResponse {
+  repeated FightAffect affects = 1;
+}
+
+message FightAffect {
+  string actor_id = 1;
+  string target_id = 2;
+  string skill = 3;
+  repeated Attribute attributes = 4;
+}
+
+message Attribute {
+  string type = 1;
+  string value = 2;
+}

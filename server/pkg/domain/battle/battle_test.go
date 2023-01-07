@@ -1,10 +1,12 @@
 package battle_test
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
-	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func getTwentyHPCharacter() character.Character {
@@ -24,6 +26,10 @@ func (s *fakeSkill) Use(am, dm character.AttributeTypeMap) (aa, ta []character.A
 	return nil, nil
 }
 
+func (s *fakeSkill) Name() string {
+	return "fakeSkill"
+}
+
 // Test skill is used in the battle fight. The ally and enemy skill should be used.
 func TestBattle_FightUseSkill(t *testing.T) {
 	ally := getTwentyHPCharacter()
@@ -32,8 +38,8 @@ func TestBattle_FightUseSkill(t *testing.T) {
 	enemySkill := &fakeSkill{}
 	enemyMob := battle.NewMob(enemy, enemySkill)
 
-	b := battle.NewBattle(ally, enemyMob)
-	err := b.Fight([]character.Skill{allySkill})
+	b := battle.NewBattle("", ally, enemyMob)
+	_, err := b.Fight([]character.Skill{allySkill})
 
 	assert.NoError(t, err)
 	assert.True(t, allySkill.used)

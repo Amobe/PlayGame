@@ -14,6 +14,10 @@ func NewCharacter() Character {
 	}
 }
 
+func (c Character) ID() string {
+	return c.CharacterID
+}
+
 func (c *Character) GetAttributeMap() AttributeTypeMap {
 	res := NewAttributeTypeMap()
 	for _, attr := range c.Basement {
