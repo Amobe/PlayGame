@@ -4,8 +4,9 @@ import (
 	"math"
 	"testing"
 
-	"github.com/Amobe/PlayGame/server/pkg/utils"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
 func BenchmarkGetProbabilitySampling(b *testing.B) {
@@ -15,7 +16,7 @@ func BenchmarkGetProbabilitySampling(b *testing.B) {
 	}
 }
 
-func TestGetProbabilitySamplingAcurracy(t *testing.T) {
+func TestGetProbabilitySamplingAccuracy(t *testing.T) {
 	rate := 0.555
 	sample := 10000000
 	successCnt := 0
@@ -30,4 +31,15 @@ func TestGetProbabilitySamplingAcurracy(t *testing.T) {
 
 	difference := math.Abs(rate - successRate)
 	assert.Truef(t, difference < 0.0005, "difference %f must less than 0.0005", difference)
+}
+
+func TestGetRandIntInRange(t *testing.T) {
+	min := 10
+	max := 100
+
+	for i := 0; i < 10000; i++ {
+		v := utils.GetRandIntInRange(min, max)
+		cond := v >= min && v <= max
+		assert.True(t, cond)
+	}
 }

@@ -61,12 +61,14 @@ func NewAttributeTypeMap() AttributeTypeMap {
 	return make(AttributeTypeMap)
 }
 
-func (a AttributeTypeMap) Insert(attr Attribute) {
-	target, ok := a[attr.Type]
-	if !ok {
-		a[attr.Type] = attr
-		return
+func (a AttributeTypeMap) Insert(attrs ...Attribute) {
+	for _, attr := range attrs {
+		target, ok := a[attr.Type]
+		if !ok {
+			a[attr.Type] = attr
+			return
+		}
+		target.Add(attr.GetInt())
+		a[attr.Type] = target
 	}
-	target.Add(attr.GetInt())
-	a[attr.Type] = target
 }

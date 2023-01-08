@@ -1,17 +1,31 @@
 package character
 
+import (
+	"strconv"
+
+	"github.com/Amobe/PlayGame/server/pkg/utils"
+)
+
 type Character struct {
 	CharacterID string
-	Basement    []Attribute
+	Basement    AttributeTypeMap
 	Equipment   Equipment
 }
 
 func NewCharacter() Character {
-	return Character{
-		Basement: []Attribute{
-			{Type: AttributeTypeHP, Value: "100"},
-		},
+	c := Character{
+		Basement: NewAttributeTypeMap(),
 	}
+	return c
+}
+
+func RandomCharacter() Character {
+	c := NewCharacter()
+	hp := utils.GetRandIntInRange(100, 200)
+	atk := utils.GetRandIntInRange(20, 50)
+	c.Basement.Insert(Attribute{Type: AttributeTypeHP, Value: strconv.Itoa(hp)})
+	c.Basement.Insert(Attribute{Type: AttributeTypeATK, Value: strconv.Itoa(atk)})
+	return c
 }
 
 func (c Character) ID() string {
@@ -45,12 +59,12 @@ func (c *Character) Alive() bool {
 }
 
 func (c *Character) Affect(attr []Attribute) {
-	c.Basement = append(c.Basement, attr...)
+	c.Basement.Insert(attr...)
 
 	// dead
 	am := c.GetAttributeMap()
 	if am[AttributeTypeHP].GetInt() == 0 {
-		c.Basement = append(c.Basement, Attribute{Type: AttributeTypeDead})
+		c.Basement.Insert(Attribute{Type: AttributeTypeDead})
 	}
 }
 

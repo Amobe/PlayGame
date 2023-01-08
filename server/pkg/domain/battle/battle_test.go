@@ -9,14 +9,6 @@ import (
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 )
 
-func getTwentyHPCharacter() character.Character {
-	return character.Character{
-		Basement: []character.Attribute{
-			{Type: character.AttributeTypeHP, Value: "20"},
-		},
-	}
-}
-
 type fakeSkill struct {
 	used bool
 }
@@ -32,9 +24,9 @@ func (s *fakeSkill) Name() string {
 
 // Test skill is used in the battle fight. The ally and enemy skill should be used.
 func TestBattle_FightUseSkill(t *testing.T) {
-	ally := getTwentyHPCharacter()
+	ally := character.NewCharacter()
 	allySkill := &fakeSkill{}
-	enemy := getTwentyHPCharacter()
+	enemy := character.NewCharacter()
 	enemySkill := &fakeSkill{}
 	enemyMob := battle.NewMob(enemy, enemySkill)
 

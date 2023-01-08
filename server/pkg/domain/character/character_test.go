@@ -26,17 +26,26 @@ func (s *skillTest) Name() string {
 }
 
 func TestAct(t *testing.T) {
-	attacker := character.NewCharacter()
+	attackerAttr := character.NewAttributeTypeMap()
+	attackerAttr.Insert(character.Attribute{Type: character.AttributeTypeHP, Value: "100"})
+	attacker := character.Character{
+		Basement: attackerAttr,
+	}
 	defender := character.NewCharacter()
 	skill := &skillTest{}
 
-	wantAttacker := character.NewCharacter()
+	wantAttackerAttr := character.NewAttributeTypeMap()
+	wantAttackerAttr.Insert(character.Attribute{Type: character.AttributeTypeHP, Value: "100"})
+	wantAttacker := character.Character{
+		Basement: wantAttackerAttr,
+	}
+	wantDefenderAttr := character.NewAttributeTypeMap()
+	wantDefenderAttr.Insert(
+		character.Attribute{Type: character.AttributeTypeHP, Value: "-100"},
+		character.Attribute{Type: character.AttributeTypeDead},
+	)
 	wantDefender := character.Character{
-		Basement: []character.Attribute{
-			{Type: character.AttributeTypeHP, Value: "100"},
-			{Type: character.AttributeTypeHP, Value: "-100"},
-			{Type: character.AttributeTypeDead},
-		},
+		Basement: wantDefenderAttr,
 	}
 
 	affectedAttacker, affectedDefender := act(attacker, defender, skill)
