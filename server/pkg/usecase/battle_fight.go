@@ -36,7 +36,7 @@ func (u *BattleFightUsecase) Execute(in BattleFightIn) (out BattleFightOut, err 
 	fakeSkill := []character.Skill{
 		character.NewSkillPoisonHit(),
 	}
-	affects, err := b.Fight(fakeSkill)
+	err = b.Fight(fakeSkill)
 	if err != nil {
 		err = fmt.Errorf("battle fight: %w", err)
 		return
@@ -47,7 +47,12 @@ func (u *BattleFightUsecase) Execute(in BattleFightIn) (out BattleFightOut, err 
 		err = fmt.Errorf("battle repository save: %w", err)
 	}
 
-	fmt.Println(utils.ToString(affects))
-	out.Affects = affects
+	events := b.Events()
+	for _, ev := range events {
+		fmt.Println(utils.ToString(ev))
+		if foughtEv, ok := ev.(battle.EventBattleFought); ok {
+			out.Affects = foughtEv.Affects
+		}
+	}
 	return
 }

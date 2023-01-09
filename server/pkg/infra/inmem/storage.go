@@ -2,17 +2,15 @@ package inmem
 
 import (
 	"fmt"
+
+	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
 
-type Entity interface {
-	ID() string
-}
-
-type inmemStorage[T Entity] struct {
+type inmemStorage[T domain.Aggregator] struct {
 	storage map[string]T
 }
 
-func newInmemStorage[T Entity]() *inmemStorage[T] {
+func newInmemStorage[T domain.Aggregator]() *inmemStorage[T] {
 	return &inmemStorage[T]{
 		storage: make(map[string]T),
 	}

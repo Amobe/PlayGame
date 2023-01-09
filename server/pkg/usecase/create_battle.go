@@ -9,32 +9,32 @@ import (
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
-type NewBattleInput struct {
+type CreateBattleInput struct {
 	CharacterID string
 	StageID     string
 }
 
-type NewBattleOutput struct {
+type CreateBattleOutput struct {
 	Battle battle.Battle
 }
 
-type NewBattleUsecase struct {
+type CreateBattleUsecase struct {
 	characterRepo character.Repository
 	stageRepo     stage.Repository
 	battleRepo    battle.Repository
 }
 
-func NewNewBattleUsecase(
+func NewCreateBattleUsecase(
 	characterRepo character.Repository, stageRepo stage.Repository, battleRepo battle.Repository,
-) *NewBattleUsecase {
-	return &NewBattleUsecase{
+) *CreateBattleUsecase {
+	return &CreateBattleUsecase{
 		characterRepo: characterRepo,
 		stageRepo:     stageRepo,
 		battleRepo:    battleRepo,
 	}
 }
 
-func (u *NewBattleUsecase) Execute(in NewBattleInput) (out NewBattleOutput, err error) {
+func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOutput, err error) {
 	c, err := u.characterRepo.Get(in.CharacterID)
 	if err != nil {
 		err = fmt.Errorf("character repository get: %w", err)
@@ -46,15 +46,25 @@ func (u *NewBattleUsecase) Execute(in NewBattleInput) (out NewBattleOutput, err 
 		return
 	}
 
-	battleID := utils.NewUUID()
-	b := battle.NewBattle(battleID, c, s.Mob)
-	err = u.battleRepo.Create(b)
-	if err != nil {
-		err = fmt.Errorf("battle repository create: %w", err)
+	var mobs []battle.Fighter
+	for _, m := range s.Mobs {
+		mobs = append(mobs, m)
 	}
 
-	out = NewBattleOutput{
-		Battle: b,
+	battleID := utils.NewUUID()
+	b, err := battle.CreateBattle(battleID, c, mobs)
+	if err != nil {
+		err = fmt.Errorf("create battle: %w", err)
+		return
+	}
+	err = u.battleRepo.Save(b)
+	if err != nil {
+		err = fmt.Errorf("battle repository create: %w", err)
+		return
+	}
+
+	out = CreateBattleOutput{
+		Battle: *b,
 	}
 	return
 }

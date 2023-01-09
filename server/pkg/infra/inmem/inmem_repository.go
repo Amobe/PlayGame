@@ -8,17 +8,17 @@ import (
 
 var _ character.Repository = &CharacterRepository{}
 
-type CharacterRepository = inmemStorage[character.Character]
+type CharacterRepository = inmemStorage[*character.Character]
 
 func NewInmemCharacterRepository() *CharacterRepository {
-	s := newInmemStorage[character.Character]()
+	s := newInmemStorage[*character.Character]()
 	attrs := []character.Attribute{
 		{Type: character.AttributeTypeHP, Value: "500"},
 		{Type: character.AttributeTypeATK, Value: "10"},
 	}
 	attrMap := character.NewAttributeTypeMap()
 	attrMap.Insert(attrs...)
-	fakeCharacter := character.Character{
+	fakeCharacter := &character.Character{
 		CharacterID: "hero",
 		Basement:    attrMap,
 	}
@@ -28,13 +28,13 @@ func NewInmemCharacterRepository() *CharacterRepository {
 
 var _ stage.Repository = &StageRepository{}
 
-type StageRepository = inmemStorage[stage.Stage]
+type StageRepository = inmemStorage[*stage.Stage]
 
 func NewInmemStageRepository() *StageRepository {
-	s := newInmemStorage[stage.Stage]()
-	fakeStage := stage.Stage{
+	s := newInmemStorage[*stage.Stage]()
+	fakeStage := &stage.Stage{
 		StageID: "fake",
-		Mob:     battle.NewMob(character.RandomCharacter(), character.NewSkillPoisonHit()),
+		Mobs:    []battle.Mob{battle.NewMob(character.RandomCharacter("fake_character"), character.NewSkillPoisonHit())},
 	}
 	s.Create(fakeStage)
 	return s
@@ -42,8 +42,8 @@ func NewInmemStageRepository() *StageRepository {
 
 var _ battle.Repository = &BattleRepository{}
 
-type BattleRepository = inmemStorage[battle.Battle]
+type BattleRepository = inmemEventStorage[*battle.Battle]
 
 func NewInmemBattleRepository() *BattleRepository {
-	return newInmemStorage[battle.Battle]()
+	return newInmemEventStorage[*battle.Battle](battle.AggregatorLoader)
 }

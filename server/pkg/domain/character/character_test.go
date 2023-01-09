@@ -9,7 +9,7 @@ import (
 )
 
 func act(actor, target character.Character, skill character.Skill) (affectedActor, affectedTarget character.Character) {
-	aa, ta := skill.Use(actor.GetAttributeMap(), target.GetAttributeMap())
+	aa, ta := skill.Use(actor.AttributeMap(), target.AttributeMap())
 	actor.Affect(aa)
 	target.Affect(ta)
 	return actor, target
@@ -31,7 +31,7 @@ func TestAct(t *testing.T) {
 	attacker := character.Character{
 		Basement: attackerAttr,
 	}
-	defender := character.NewCharacter()
+	defender := character.NewCharacter("defender")
 	skill := &skillTest{}
 
 	wantAttackerAttr := character.NewAttributeTypeMap()

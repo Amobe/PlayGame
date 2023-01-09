@@ -37,11 +37,11 @@ func NewGameServiceHandler(deps GameServiceDeps) *GameServiceHandler {
 
 func (s *GameServiceHandler) NewBattle(ctx context.Context, req *gamev1.NewBattleRequest) (*gamev1.NewBattleResponse, error) {
 	log.Println("NewBattle")
-	in := usecase.NewBattleInput{
+	in := usecase.CreateBattleInput{
 		CharacterID: "hero",
 		StageID:     "fake",
 	}
-	uc := usecase.NewNewBattleUsecase(s.characterRepo, s.stageRepo, s.battleRepo)
+	uc := usecase.NewCreateBattleUsecase(s.characterRepo, s.stageRepo, s.battleRepo)
 	out, err := uc.Execute(in)
 	if err != nil {
 		return nil, fmt.Errorf("execute new battle usecase: %w", err)

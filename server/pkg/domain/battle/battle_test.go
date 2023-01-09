@@ -10,30 +10,40 @@ import (
 )
 
 type fakeSkill struct {
-	used bool
+	usedFunc func()
 }
 
-func (s *fakeSkill) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
-	s.used = true
+func (s fakeSkill) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
+	s.usedFunc()
 	return nil, nil
 }
 
-func (s *fakeSkill) Name() string {
+func (s fakeSkill) Name() string {
 	return "fakeSkill"
 }
 
 // Test skill is used in the battle fight. The ally and enemy skill should be used.
 func TestBattle_FightUseSkill(t *testing.T) {
-	ally := character.NewCharacter()
-	allySkill := &fakeSkill{}
-	enemy := character.NewCharacter()
-	enemySkill := &fakeSkill{}
-	enemyMob := battle.NewMob(enemy, enemySkill)
+	ally := character.NewCharacter("ally")
+	isAllySkillUsed := false
+	allySkill := fakeSkill{
+		usedFunc: func() {
+			isAllySkillUsed = true
+		},
+	}
+	enemy := character.NewCharacter("enemy")
+	isEnemySkillUsed := false
+	enemySkill := fakeSkill{
+		usedFunc: func() {
+			isEnemySkillUsed = true
+		},
+	}
+	enemyMobs := []battle.Fighter{battle.NewMob(enemy, enemySkill)}
 
-	b := battle.NewBattle("", ally, enemyMob)
-	_, err := b.Fight([]character.Skill{allySkill})
+	b, _ := battle.CreateBattle("", ally, enemyMobs)
 
+	err := b.Fight([]character.Skill{allySkill})
 	assert.NoError(t, err)
-	assert.True(t, allySkill.used)
-	assert.True(t, enemySkill.used)
+	assert.True(t, isAllySkillUsed)
+	assert.True(t, isEnemySkillUsed)
 }
