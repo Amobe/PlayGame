@@ -21,6 +21,24 @@ func (s skill) Name() string {
 	return s.name
 }
 
+type SkillEmpty struct {
+	skill
+}
+
+func NewSkillEmpty() SkillEmpty {
+	return SkillEmpty{
+		skill{
+			SkillID:      "empty",
+			name:         "empty",
+			AttributeMap: nil,
+		},
+	}
+}
+
+func (s SkillEmpty) Use(am, dm AttributeTypeMap) (aa, ta []Attribute) {
+	return
+}
+
 type SkillPoisonHit struct {
 	skill
 }

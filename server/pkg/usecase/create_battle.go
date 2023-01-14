@@ -46,13 +46,8 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 		return
 	}
 
-	var mobs []battle.Fighter
-	for _, m := range s.Mobs {
-		mobs = append(mobs, m)
-	}
-
 	battleID := utils.NewUUID()
-	b, err := battle.CreateBattle(battleID, c, mobs)
+	b, err := battle.CreateBattle(battleID, c, s.Fighter, s.Slot)
 	if err != nil {
 		err = fmt.Errorf("create battle: %w", err)
 		return

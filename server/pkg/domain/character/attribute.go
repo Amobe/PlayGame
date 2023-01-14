@@ -66,9 +66,17 @@ func (a AttributeTypeMap) Insert(attrs ...Attribute) {
 		target, ok := a[attr.Type]
 		if !ok {
 			a[attr.Type] = attr
-			return
+			continue
 		}
 		target.Add(attr.GetInt())
 		a[attr.Type] = target
 	}
+}
+
+func (a AttributeTypeMap) Get(attributeType AttributeType) int {
+	attr, ok := a[attributeType]
+	if !ok {
+		return 0
+	}
+	return attr.GetInt()
 }

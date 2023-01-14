@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
@@ -33,10 +32,7 @@ func (u *BattleFightUsecase) Execute(in BattleFightIn) (out BattleFightOut, err 
 		return
 	}
 
-	fakeSkill := []character.Skill{
-		character.NewSkillPoisonHit(),
-	}
-	err = b.Fight(fakeSkill)
+	err = b.FightToTheEnd()
 	if err != nil {
 		err = fmt.Errorf("battle fight: %w", err)
 		return

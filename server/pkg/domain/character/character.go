@@ -18,21 +18,22 @@ type Character struct {
 	Equipment   Equipment
 }
 
-func NewCharacter(id string) Character {
+func NewCharacter(id string, attrs ...Attribute) Character {
 	c := Character{
 		CharacterID: id,
 		Basement:    NewAttributeTypeMap(),
 	}
+	c.Basement.Insert(attrs...)
 	return c
 }
 
 func RandomCharacter(id string) Character {
-	c := NewCharacter(id)
 	hp := utils.GetRandIntInRange(100, 200)
 	atk := utils.GetRandIntInRange(20, 50)
-	c.Basement.Insert(Attribute{Type: AttributeTypeHP, Value: strconv.Itoa(hp)})
-	c.Basement.Insert(Attribute{Type: AttributeTypeATK, Value: strconv.Itoa(atk)})
-	return c
+	return NewCharacter(id,
+		Attribute{Type: AttributeTypeHP, Value: strconv.Itoa(hp)},
+		Attribute{Type: AttributeTypeATK, Value: strconv.Itoa(atk)},
+	)
 }
 
 func (c Character) ID() string {
@@ -51,12 +52,7 @@ func (c Character) AttributeMap() AttributeTypeMap {
 }
 
 func (c Character) GetAgi() int {
-	attrMap := c.AttributeMap()
-	attr, ok := attrMap[AttributeTypeAGI]
-	if !ok {
-		return 0
-	}
-	return attr.GetInt()
+	return c.AttributeMap().Get(AttributeTypeAGI)
 }
 
 func (c Character) Alive() bool {

@@ -10,11 +10,13 @@ import (
 )
 
 type fakeSkill struct {
-	usedFunc func()
+	usedFunc func() (aa, ta []character.Attribute)
 }
 
 func (s fakeSkill) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
-	s.usedFunc()
+	if s.usedFunc != nil {
+		return s.usedFunc()
+	}
 	return nil, nil
 }
 
@@ -24,26 +26,153 @@ func (s fakeSkill) Name() string {
 
 // Test skill is used in the battle fight. The ally and enemy skill should be used.
 func TestBattle_FightUseSkill(t *testing.T) {
-	ally := character.NewCharacter("ally")
+	ally := character.NewCharacter(
+		"ally",
+		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+	)
 	isAllySkillUsed := false
 	allySkill := fakeSkill{
-		usedFunc: func() {
+		usedFunc: func() (aa, ta []character.Attribute) {
 			isAllySkillUsed = true
+			return
 		},
 	}
-	enemy := character.NewCharacter("enemy")
+	allySlot := battle.NewSlot(allySkill)
+	enemy := character.NewCharacter(
+		"enemy",
+		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+	)
 	isEnemySkillUsed := false
 	enemySkill := fakeSkill{
-		usedFunc: func() {
+		usedFunc: func() (aa, ta []character.Attribute) {
 			isEnemySkillUsed = true
+			return
 		},
 	}
-	enemyMobs := []battle.Fighter{battle.NewMob(enemy, enemySkill)}
+	enemySlot := battle.NewSlot(enemySkill)
 
-	b, _ := battle.CreateBattle("", ally, enemyMobs)
+	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
+	b.SetAllySlot(allySlot)
 
-	err := b.Fight([]character.Skill{allySkill})
+	err := b.Fight()
 	assert.NoError(t, err)
 	assert.True(t, isAllySkillUsed)
 	assert.True(t, isEnemySkillUsed)
+}
+
+// Test skill is used in agi order.
+func TestBattle_FightInOrder(t *testing.T) {
+	var usedOrder []string
+	ally := character.NewCharacter(
+		"ally",
+		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+	)
+	allySkill := fakeSkill{
+		usedFunc: func() (aa, ta []character.Attribute) {
+			usedOrder = append(usedOrder, "ally")
+			return
+		},
+	}
+	allySlot := battle.NewSlot(allySkill)
+	enemy := character.NewCharacter(
+		"enemy",
+		character.Attribute{Type: character.AttributeTypeAGI, Value: "10"},
+		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+	)
+	enemySkill := fakeSkill{
+		usedFunc: func() (aa, ta []character.Attribute) {
+			usedOrder = append(usedOrder, "enemy")
+			return
+		},
+	}
+	enemySlot := battle.NewSlot(enemySkill)
+
+	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
+	_ = b.SetAllySlot(allySlot)
+
+	err := b.Fight()
+
+	want := []string{"enemy", "ally"}
+	assert.NoError(t, err)
+	assert.Equal(t, want, usedOrder)
+}
+
+func TestBattle_FightToWin(t *testing.T) {
+	ally := character.NewCharacter(
+		"ally",
+		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+	)
+	allySlot := battle.NewSlot(fakeSkill{})
+	enemy := character.NewCharacter("enemy")
+	enemySlot := battle.NewSlot(fakeSkill{})
+
+	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
+	_ = b.SetAllySlot(allySlot)
+	_ = b.Fight()
+
+	assert.Equal(t, battle.StatusWon, b.Status())
+
+	events := b.Events()
+	lastEvent := events[len(events)-1]
+	assert.IsType(t, battle.EventBattleWon{}, lastEvent)
+}
+
+func TestBattle_FightToLose(t *testing.T) {
+	ally := character.NewCharacter("ally")
+	allySlot := battle.NewSlot(fakeSkill{})
+	enemy := character.NewCharacter(
+		"enemy",
+		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+	)
+	enemySlot := battle.NewSlot(fakeSkill{})
+
+	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
+	_ = b.SetAllySlot(allySlot)
+	_ = b.Fight()
+
+	assert.Equal(t, battle.StatusLost, b.Status())
+
+	events := b.Events()
+	lastEvent := events[len(events)-1]
+	assert.IsType(t, battle.EventBattleLost{}, lastEvent)
+}
+
+// give an ally has 51 hp, and an enemy attack ally take 1 hp a time.
+// when fight number reach to 50 round limitation
+// then the battle should be draw
+// and the enemy should attack 50 times
+// and the ally has 1 hp left
+func TestBattle_FightToTheEnd(t *testing.T) {
+	ally := character.NewCharacter("ally",
+		character.Attribute{Type: character.AttributeTypeHP, Value: "51"},
+	)
+	enemy := character.NewCharacter("enemy",
+		character.Attribute{Type: character.AttributeTypeHP, Value: "1"},
+	)
+	enemySkill := fakeSkill{
+		usedFunc: func() (aa, ta []character.Attribute) {
+			return nil, []character.Attribute{
+				{Type: character.AttributeTypeHP, Value: "-1"},
+			}
+		},
+	}
+	enemySlot := battle.NewSlot(enemySkill)
+
+	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
+	_ = b.FightToTheEnd()
+
+	var foughtEvents []battle.EventBattleFought
+	var drawEvents []battle.EventBattleDraw
+	for _, battleEvent := range b.Events() {
+		switch event := battleEvent.(type) {
+		case battle.EventBattleFought:
+			foughtEvents = append(foughtEvents, event)
+		case battle.EventBattleDraw:
+			drawEvents = append(drawEvents, event)
+		}
+	}
+
+	assert.Equal(t, 50, len(foughtEvents))
+	assert.Equal(t, 1, b.Fighter("ally").AttributeMap().Get(character.AttributeTypeHP))
+	assert.Equal(t, 1, len(drawEvents))
 }

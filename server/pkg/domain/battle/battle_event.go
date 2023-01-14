@@ -8,13 +8,24 @@ type EventBattleCreated struct {
 	coreEvent
 	BattleID   string
 	FighterMap map[string]Fighter
+	TargetMap  map[string]string
 	AllyMap    map[string]interface{}
 	EnemyMap   map[string]interface{}
+	EnemySlot  Slot
 	Order      []string // the order of the action, contains a list of character ID
 }
 
 func (EventBattleCreated) Name() string {
 	return "battle_created"
+}
+
+type EventBattleAllySlotSet struct {
+	coreEvent
+	AllySlot Slot
+}
+
+func (EventBattleAllySlotSet) Name() string {
+	return "battle_ally_slot_Set"
 }
 
 type EventBattleFought struct {
@@ -40,4 +51,12 @@ type EventBattleLost struct {
 
 func (EventBattleLost) Name() string {
 	return "battle_lost"
+}
+
+type EventBattleDraw struct {
+	coreEvent
+}
+
+func (EventBattleDraw) Name() string {
+	return "battle_draw"
 }

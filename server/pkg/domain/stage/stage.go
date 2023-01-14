@@ -12,7 +12,8 @@ type coreAggregator = domain.CoreAggregator
 type Stage struct {
 	coreAggregator
 	StageID string
-	Mobs    []battle.Mob
+	Fighter battle.Fighter
+	Slot    battle.Slot
 }
 
 func (s Stage) ID() string {
