@@ -43,8 +43,8 @@ func NewInmemStageRepository() *StageRepository {
 
 var _ battle.Repository = &BattleRepository{}
 
-type BattleRepository = inmemEventStorage[*battle.Battle]
+type BattleRepository = inmemEventStorage[battle.Battle]
 
 func NewInmemBattleRepository() *BattleRepository {
-	return newInmemEventStorage[*battle.Battle](battle.AggregatorLoader)
+	return newInmemEventStorage[battle.Battle](battle.AggregatorLoader)
 }

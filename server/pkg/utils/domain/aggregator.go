@@ -23,17 +23,17 @@ func (a *CoreAggregator) Apply(new bool, events ...Event) {
 	}
 }
 
-func (a *CoreAggregator) Events() []Event {
+func (a CoreAggregator) Events() []Event {
 	res := a.events
 	a.events = nil
 	return res
 }
 
-func (a *CoreAggregator) Version() int {
+func (a CoreAggregator) Version() int {
 	return a.version
 }
 
-func (a *CoreAggregator) embedCoreAggregator() {}
+func (a CoreAggregator) embedCoreAggregator() {}
 
 type Event interface {
 	Name() string

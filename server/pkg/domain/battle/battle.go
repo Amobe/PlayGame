@@ -7,7 +7,7 @@ import (
 	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
 
-var _ domain.Aggregator = &Battle{}
+var _ domain.Aggregator = Battle{}
 
 type coreAggregator = domain.CoreAggregator
 
@@ -24,20 +24,20 @@ type Battle struct {
 	order      []string
 }
 
-func (b *Battle) ID() string {
+func (b Battle) ID() string {
 	return b.battleID
 }
 
-func (b *Battle) Status() Status {
+func (b Battle) Status() Status {
 	return b.status
 }
 
-func (b *Battle) Fighter(id string) Fighter {
+func (b Battle) Fighter(id string) Fighter {
 	return b.fighterMap[id]
 }
 
-func newBattle() *Battle {
-	return &Battle{
+func newBattle() Battle {
+	return Battle{
 		fighterMap: make(map[string]Fighter),
 		allyMap:    make(map[string]interface{}),
 		enemyMap:   make(map[string]interface{}),
@@ -45,15 +45,15 @@ func newBattle() *Battle {
 	}
 }
 
-func AggregatorLoader(events []domain.Event) (*Battle, error) {
+func AggregatorLoader(events []domain.Event) (Battle, error) {
 	b := newBattle()
 	if err := b.apply(false, events...); err != nil {
-		return nil, fmt.Errorf("apply battle events: %w", err)
+		return Battle{}, fmt.Errorf("apply battle events: %w", err)
 	}
 	return b, nil
 }
 
-func CreateBattle(id string, ally Fighter, enemy Fighter, enemySlot Slot) (*Battle, error) {
+func CreateBattle(id string, ally Fighter, enemy Fighter, enemySlot Slot) (Battle, error) {
 	fighterMap := map[string]Fighter{
 		ally.ID():  ally,
 		enemy.ID(): enemy,
@@ -83,7 +83,7 @@ func CreateBattle(id string, ally Fighter, enemy Fighter, enemySlot Slot) (*Batt
 	}
 	b := newBattle()
 	if err := b.applyNew(createdEvent); err != nil {
-		return nil, fmt.Errorf("apply battle created event: %w", err)
+		return Battle{}, fmt.Errorf("apply battle created event: %w", err)
 	}
 	return b, nil
 }

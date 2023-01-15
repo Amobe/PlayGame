@@ -59,7 +59,7 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 	}
 
 	out = CreateBattleOutput{
-		Battle: *b,
+		Battle: b,
 	}
 	return
 }
