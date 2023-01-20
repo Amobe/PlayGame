@@ -5,10 +5,12 @@ import (
 )
 
 type skillConfigData struct {
-	Skills []struct {
-		Type       string         `json:"type"`
-		Attributes map[string]any `json:"attributes"`
-	} `json:"skills"`
+	Skills []skillDate `json:"skills"`
+}
+
+type skillDate struct {
+	Type       string         `json:"type"`
+	Attributes map[string]any `json:"attributes"`
 }
 
 //go:embed resources/skill.json

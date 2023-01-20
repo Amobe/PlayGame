@@ -1,4 +1,4 @@
-package character
+package valueobject
 
 import (
 	"strconv"
@@ -36,6 +36,7 @@ const (
 	AttributeTypeHP       AttributeType = "hp"
 	AttributeTypeAGI      AttributeType = "agi"
 	AttributeTypeATK      AttributeType = "atk"
+	AttributeTypeATKBonus AttributeType = "atk_bonus"
 	AttributeTypeDEF      AttributeType = "def"
 	AttributeTypeMATK     AttributeType = "matk"
 	AttributeTypeMDEF     AttributeType = "mdef"

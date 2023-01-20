@@ -1,17 +1,17 @@
 package battle
 
 import (
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/valueobject"
 )
 
 type Affect struct {
 	ActorID    string
 	TargetID   string
 	Skill      string
-	Attributes []character.Attribute
+	Attributes []valueobject.Attribute
 }
 
-func NewAffect(actorID, targetID, skillName string, attrs []character.Attribute) Affect {
+func NewAffect(actorID, targetID, skillName string, attrs []valueobject.Attribute) Affect {
 	return Affect{
 		ActorID:    actorID,
 		TargetID:   targetID,

@@ -3,7 +3,7 @@ package gamegrpc
 import (
 	gamev1 "github.com/Amobe/PlayGame/server/gen/proto/go/game/v1"
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/valueobject"
 )
 
 func BatchAffectToPB(al []battle.Affect) []*gamev1.FightAffect {
@@ -23,7 +23,7 @@ func AffectToPB(a battle.Affect) *gamev1.FightAffect {
 	}
 }
 
-func BatchAttributeToPB(al []character.Attribute) []*gamev1.Attribute {
+func BatchAttributeToPB(al []valueobject.Attribute) []*gamev1.Attribute {
 	res := make([]*gamev1.Attribute, 0, len(al))
 	for _, a := range al {
 		res = append(res, AttributeToPB(a))
@@ -31,7 +31,7 @@ func BatchAttributeToPB(al []character.Attribute) []*gamev1.Attribute {
 	return res
 }
 
-func AttributeToPB(a character.Attribute) *gamev1.Attribute {
+func AttributeToPB(a valueobject.Attribute) *gamev1.Attribute {
 	return &gamev1.Attribute{
 		Type:  string(a.Type),
 		Value: a.Value,

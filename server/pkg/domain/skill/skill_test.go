@@ -3,8 +3,8 @@ package skill_test
 import (
 	"testing"
 
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
+	"github.com/Amobe/PlayGame/server/pkg/domain/valueobject"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -12,10 +12,10 @@ import (
 func TestSkillHit(t *testing.T) {
 	s := skill.NewSkillPoisonHit()
 
-	am := character.NewAttributeTypeMap()
-	am.Insert(character.Attribute{character.AttributeTypeATK, "10"})
-	dm := character.NewAttributeTypeMap()
-	dm.Insert(character.Attribute{character.AttributeTypeHP, "100"})
+	am := valueobject.NewAttributeTypeMap()
+	am.Insert(valueobject.Attribute{valueobject.AttributeTypeATK, "10"})
+	dm := valueobject.NewAttributeTypeMap()
+	dm.Insert(valueobject.Attribute{valueobject.AttributeTypeHP, "100"})
 
 	aa, da := s.Use(am, dm)
 

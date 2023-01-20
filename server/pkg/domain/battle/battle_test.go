@@ -7,13 +7,14 @@ import (
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/valueobject"
 )
 
 type fakeSkill struct {
-	usedFunc func() (aa, ta []character.Attribute)
+	usedFunc func() (aa, ta []valueobject.Attribute)
 }
 
-func (s fakeSkill) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
+func (s fakeSkill) Use(am, dm valueobject.AttributeTypeMap) (aa, ta []valueobject.Attribute) {
 	if s.usedFunc != nil {
 		return s.usedFunc()
 	}
@@ -28,11 +29,11 @@ func (s fakeSkill) Name() string {
 func TestBattle_FightUseSkill(t *testing.T) {
 	ally := character.NewCharacter(
 		"ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "10"},
 	)
 	isAllySkillUsed := false
 	allySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []valueobject.Attribute) {
 			isAllySkillUsed = true
 			return
 		},
@@ -40,11 +41,11 @@ func TestBattle_FightUseSkill(t *testing.T) {
 	allySlot := battle.NewSlot(allySkill)
 	enemy := character.NewCharacter(
 		"enemy",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "10"},
 	)
 	isEnemySkillUsed := false
 	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []valueobject.Attribute) {
 			isEnemySkillUsed = true
 			return
 		},
@@ -65,10 +66,10 @@ func TestBattle_FightInOrder(t *testing.T) {
 	var usedOrder []string
 	ally := character.NewCharacter(
 		"ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "10"},
 	)
 	allySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []valueobject.Attribute) {
 			usedOrder = append(usedOrder, "ally")
 			return
 		},
@@ -76,11 +77,11 @@ func TestBattle_FightInOrder(t *testing.T) {
 	allySlot := battle.NewSlot(allySkill)
 	enemy := character.NewCharacter(
 		"enemy",
-		character.Attribute{Type: character.AttributeTypeAGI, Value: "10"},
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeAGI, Value: "10"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "10"},
 	)
 	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []valueobject.Attribute) {
 			usedOrder = append(usedOrder, "enemy")
 			return
 		},
@@ -100,7 +101,7 @@ func TestBattle_FightInOrder(t *testing.T) {
 func TestBattle_FightToWin(t *testing.T) {
 	ally := character.NewCharacter(
 		"ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "10"},
 	)
 	allySlot := battle.NewSlot(fakeSkill{})
 	enemy := character.NewCharacter("enemy")
@@ -122,7 +123,7 @@ func TestBattle_FightToLose(t *testing.T) {
 	allySlot := battle.NewSlot(fakeSkill{})
 	enemy := character.NewCharacter(
 		"enemy",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "10"},
 	)
 	enemySlot := battle.NewSlot(fakeSkill{})
 
@@ -144,15 +145,15 @@ func TestBattle_FightToLose(t *testing.T) {
 // and the ally has 1 hp left
 func TestBattle_FightToTheEnd(t *testing.T) {
 	ally := character.NewCharacter("ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "51"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "51"},
 	)
 	enemy := character.NewCharacter("enemy",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "1"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "1"},
 	)
 	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
-			return nil, []character.Attribute{
-				{Type: character.AttributeTypeHP, Value: "-1"},
+		usedFunc: func() (aa, ta []valueobject.Attribute) {
+			return nil, []valueobject.Attribute{
+				{Type: valueobject.AttributeTypeHP, Value: "-1"},
 			}
 		},
 	}
@@ -173,6 +174,6 @@ func TestBattle_FightToTheEnd(t *testing.T) {
 	}
 
 	assert.Equal(t, 50, len(foughtEvents))
-	assert.Equal(t, 1, b.Fighter("ally").AttributeMap().Get(character.AttributeTypeHP))
+	assert.Equal(t, 1, b.Fighter("ally").AttributeMap().Get(valueobject.AttributeTypeHP))
 	assert.Equal(t, 1, len(drawEvents))
 }

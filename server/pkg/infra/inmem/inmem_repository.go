@@ -5,6 +5,7 @@ import (
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
 	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
+	"github.com/Amobe/PlayGame/server/pkg/domain/valueobject"
 )
 
 var _ character.Repository = &CharacterRepository{}
@@ -13,11 +14,11 @@ type CharacterRepository = inmemStorage[*character.Character]
 
 func NewInmemCharacterRepository() *CharacterRepository {
 	s := newInmemStorage[*character.Character]()
-	attrs := []character.Attribute{
-		{Type: character.AttributeTypeHP, Value: "500"},
-		{Type: character.AttributeTypeATK, Value: "10"},
+	attrs := []valueobject.Attribute{
+		{Type: valueobject.AttributeTypeHP, Value: "500"},
+		{Type: valueobject.AttributeTypeATK, Value: "10"},
 	}
-	attrMap := character.NewAttributeTypeMap()
+	attrMap := valueobject.NewAttributeTypeMap()
 	attrMap.Insert(attrs...)
 	fakeCharacter := &character.Character{
 		CharacterID: "hero",

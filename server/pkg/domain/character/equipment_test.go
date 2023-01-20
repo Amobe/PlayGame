@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/valueobject"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,8 +14,8 @@ func TestEquipMajorWeapon(t *testing.T) {
 	w := character.WeaponSet["Knife"]
 	e.EquipWeapon(w)
 
-	want := []character.Attribute{
-		{character.AttributeTypeATK, "10"},
+	want := []valueobject.Attribute{
+		{valueobject.AttributeTypeATK, "10"},
 	}
 	got := e.GetAttributes()
 
@@ -25,8 +27,8 @@ func TestEquipMinorWeapon(t *testing.T) {
 	w := character.WeaponSet["Shield"]
 	e.EquipWeapon(w)
 
-	want := []character.Attribute{
-		{character.AttributeTypeDEF, "10"},
+	want := []valueobject.Attribute{
+		{valueobject.AttributeTypeDEF, "10"},
 	}
 	got := e.GetAttributes()
 
@@ -38,8 +40,8 @@ func TestEquipBothHandWeapon(t *testing.T) {
 	w := character.WeaponSet["Axe"]
 	e.EquipWeapon(w)
 
-	want := []character.Attribute{
-		{character.AttributeTypeATK, "25"},
+	want := []valueobject.Attribute{
+		{valueobject.AttributeTypeATK, "25"},
 	}
 	got := e.GetAttributes()
 
@@ -52,8 +54,8 @@ func TestEquipBothHandWeaponRemoveMinorWeapon(t *testing.T) {
 	e.EquipWeapon(character.WeaponSet["Shield"])
 	e.EquipWeapon(character.WeaponSet["Axe"])
 
-	want := []character.Attribute{
-		{character.AttributeTypeATK, "25"},
+	want := []valueobject.Attribute{
+		{valueobject.AttributeTypeATK, "25"},
 	}
 	got := e.GetAttributes()
 

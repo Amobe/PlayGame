@@ -7,6 +7,7 @@ import (
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
+	"github.com/Amobe/PlayGame/server/pkg/domain/valueobject"
 )
 
 func act(actor, target character.Character, skill skill.Skill) (affectedActor, affectedTarget character.Character) {
@@ -18,8 +19,8 @@ func act(actor, target character.Character, skill skill.Skill) (affectedActor, a
 
 type skillTest struct{}
 
-func (s *skillTest) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
-	return nil, []character.Attribute{{character.AttributeTypeHP, "-100"}}
+func (s *skillTest) Use(am, dm valueobject.AttributeTypeMap) (aa, ta []valueobject.Attribute) {
+	return nil, []valueobject.Attribute{{valueobject.AttributeTypeHP, "-100"}}
 }
 
 func (s *skillTest) Name() string {
@@ -28,19 +29,19 @@ func (s *skillTest) Name() string {
 
 func TestAct(t *testing.T) {
 	attacker := character.NewCharacter("attacker",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "100"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "100"},
 	)
 	defender := character.NewCharacter("defender",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "100"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "100"},
 	)
 	skill := &skillTest{}
 
 	wantAttacker := character.NewCharacter("attacker",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "100"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "100"},
 	)
 	wantDefender := character.NewCharacter("defender",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "0"},
-		character.Attribute{Type: character.AttributeTypeDead},
+		valueobject.Attribute{Type: valueobject.AttributeTypeHP, Value: "0"},
+		valueobject.Attribute{Type: valueobject.AttributeTypeDead},
 	)
 
 	affectedAttacker, affectedDefender := act(attacker, defender, skill)
