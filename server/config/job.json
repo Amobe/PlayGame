@@ -1,0 +1,52 @@
+{
+  "jobs": [
+    {
+      "type": "warrior",
+      "available_equipment_list": [
+        "knife",
+        "shield",
+        "axe"
+      ],
+      "next_job": "knight"
+    },
+    {
+      "type": "knight",
+      "available_equipment_list": [
+        "knife",
+        "shield",
+        "axe"
+      ],
+      "next_job": "dark knight"
+    },
+    {
+      "type": "dark knight",
+      "available_equipment_list": [
+        "knife",
+        "shield",
+        "axe"
+      ]
+    },
+    {
+      "type": "thief",
+      "available_equipment_list": [
+        "dagger"
+      ],
+      "next_job": "assassin"
+    },
+    {
+      "type": "assassin",
+      "available_equipment_list": [
+        "knife",
+        "dagger"
+      ],
+      "next_job": "hermit"
+    },
+    {
+      "type": "hermit",
+      "available_equipment_list": [
+        "knife",
+        "dagger"
+      ]
+    }
+  ]
+}

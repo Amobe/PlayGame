@@ -1,0 +1,40 @@
+{
+  "equipments": [
+    {
+      "type": "knife",
+      "name": "basic_knife",
+      "slot": "major",
+      "attributes": {
+        "atk": 10,
+        "skill": "slash"
+      }
+    },
+    {
+      "type": "shield",
+      "name": "basic_shield",
+      "slot": "minor",
+      "attributes": {
+        "def": 10,
+        "skill": "block"
+      }
+    },
+    {
+      "type": "dagger",
+      "name": "basic_dagger",
+      "slot": "any",
+      "attributes": {
+        "atk": 5,
+        "skill": "stab"
+      }
+    },
+    {
+      "type": "axe",
+      "name": "basic_axe",
+      "slot": "both",
+      "attributes": {
+        "atk": 20,
+        "skill": "hack"
+      }
+    }
+  ]
+}

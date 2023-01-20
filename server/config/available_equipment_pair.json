@@ -1,0 +1,6 @@
+{
+  "available_equipment_pairs": {
+    "knife": "shield",
+    "dagger": "dagger"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "skills": [
+    {
+      "type": "slash",
+      "attributes": {
+        "cd": 2,
+        "atk_bonus": 1.4,
+        "target": 2
+      }
+    },
+    {
+      "type": "block",
+      "attributes": {
+        "cd": 2,
+        "first_cd": 1,
+        "def_stack": 0.05,
+        "max_stack": 10,
+        "target": -5
+      }
+    },
+    {
+      "type": "stab",
+      "attributes": {
+        "cd": 1,
+        "atk_bonus": 1.8,
+        "target": 1
+      }
+    },
+    {
+      "type": "hack",
+      "attributes": {
+        "cd": 3,
+        "atk_bonus": 5,
+        "target": 1
+      }
+    }
+  ]
+}
