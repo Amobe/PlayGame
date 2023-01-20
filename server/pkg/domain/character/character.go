@@ -3,6 +3,7 @@ package character
 import (
 	"strconv"
 
+	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
@@ -71,7 +72,7 @@ func (c Character) Affect(attr []Attribute) {
 	}
 }
 
-func (c Character) UseSkill(skill Skill, targetAttr AttributeTypeMap) (targetAffect []Attribute) {
+func (c Character) UseSkill(skill skill.Skill, targetAttr AttributeTypeMap) (targetAffect []Attribute) {
 	affect, targetAffect := skill.Use(c.AttributeMap(), targetAttr)
 	c.Affect(affect)
 	return targetAffect

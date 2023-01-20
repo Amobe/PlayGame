@@ -1,20 +1,31 @@
-package character
+package skill
 
 import (
 	"strconv"
 
+	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
+	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
 
-type Skill interface {
-	Use(am, dm AttributeTypeMap) (aa, ta []Attribute)
+var _ domain.Aggregator = &skill{}
+
+type coreAggregator = domain.CoreAggregator
+
+type iSkill interface {
+	Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute)
 	Name() string
 }
 
 type skill struct {
+	coreAggregator
 	SkillID      string
 	name         string
-	AttributeMap AttributeTypeMap
+	AttributeMap character.AttributeTypeMap
+}
+
+func (s skill) ID() string {
+	return s.SkillID
 }
 
 func (s skill) Name() string {
@@ -35,7 +46,7 @@ func NewSkillEmpty() SkillEmpty {
 	}
 }
 
-func (s SkillEmpty) Use(am, dm AttributeTypeMap) (aa, ta []Attribute) {
+func (s SkillEmpty) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
 	return
 }
 
@@ -44,9 +55,9 @@ type SkillPoisonHit struct {
 }
 
 func NewSkillPoisonHit() SkillPoisonHit {
-	am := NewAttributeTypeMap()
-	am.Insert(Attribute{Type: AttributeTypeSDR, Value: "1.1"})
-	am.Insert(Attribute{Type: AttributeTypeStatusH, Value: "0.5"})
+	am := character.NewAttributeTypeMap()
+	am.Insert(character.Attribute{Type: character.AttributeTypeSDR, Value: "1.1"})
+	am.Insert(character.Attribute{Type: character.AttributeTypeStatusH, Value: "0.5"})
 	return SkillPoisonHit{
 		skill: skill{
 			SkillID:      "poisonHit",
@@ -56,31 +67,31 @@ func NewSkillPoisonHit() SkillPoisonHit {
 	}
 }
 
-func (h SkillPoisonHit) Use(am, dm AttributeTypeMap) (aa, ta []Attribute) {
-	atk := am[AttributeTypeATK].GetFloat()
-	def := dm[AttributeTypeDEF].GetFloat()
-	sdr := h.AttributeMap[AttributeTypeSDR].GetFloat()
-	amp := am[AttributeTypeAMP].GetFloat()
-	ampR := dm[AttributeTypeAMPR].GetFloat()
-	dI := am[AttributeTypeDI].GetFloat()
-	dR := dm[AttributeTypeDR].GetFloat()
-	cri := am[AttributeTypeCRI].GetFloat()
-	sCri := h.AttributeMap[AttributeTypeCRI].GetFloat()
-	criR := dm[AttributeTypeCRIR].GetFloat()
-	criD := am[AttributeTypeCRID].GetFloat()
-	criDR := dm[AttributeTypeCRIDR].GetFloat()
+func (h SkillPoisonHit) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
+	atk := am[character.AttributeTypeATK].GetFloat()
+	def := dm[character.AttributeTypeDEF].GetFloat()
+	sdr := h.AttributeMap[character.AttributeTypeSDR].GetFloat()
+	amp := am[character.AttributeTypeAMP].GetFloat()
+	ampR := dm[character.AttributeTypeAMPR].GetFloat()
+	dI := am[character.AttributeTypeDI].GetFloat()
+	dR := dm[character.AttributeTypeDR].GetFloat()
+	cri := am[character.AttributeTypeCRI].GetFloat()
+	sCri := h.AttributeMap[character.AttributeTypeCRI].GetFloat()
+	criR := dm[character.AttributeTypeCRIR].GetFloat()
+	criD := am[character.AttributeTypeCRID].GetFloat()
+	criDR := dm[character.AttributeTypeCRIDR].GetFloat()
 
 	// physical damage
 	damage := damageCal(atk, def, sdr, amp, ampR, cri, criR, sCri, criD, criDR, dI, dR)
 	value := strconv.Itoa(damage * -1)
-	ta = append(ta, Attribute{Type: AttributeTypeHP, Value: value})
+	ta = append(ta, character.Attribute{Type: character.AttributeTypeHP, Value: value})
 
 	// poison hit
-	sh := am[AttributeTypeStatusH].GetFloat()
-	shR := dm[AttributeTypeStatusHR].GetFloat()
-	sSh := h.AttributeMap[AttributeTypeStatusH].GetFloat()
+	sh := am[character.AttributeTypeStatusH].GetFloat()
+	shR := dm[character.AttributeTypeStatusHR].GetFloat()
+	sSh := h.AttributeMap[character.AttributeTypeStatusH].GetFloat()
 	if isStatusHit(sh, shR, sSh) {
-		ta = append(ta, Attribute{Type: AttributeTypePoisoned, Value: "1"})
+		ta = append(ta, character.Attribute{Type: character.AttributeTypePoisoned, Value: "1"})
 	}
 
 	return nil, ta

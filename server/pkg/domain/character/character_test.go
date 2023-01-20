@@ -6,9 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
 )
 
-func act(actor, target character.Character, skill character.Skill) (affectedActor, affectedTarget character.Character) {
+func act(actor, target character.Character, skill skill.Skill) (affectedActor, affectedTarget character.Character) {
 	aa, ta := skill.Use(actor.AttributeMap(), target.AttributeMap())
 	actor.Affect(aa)
 	target.Affect(ta)

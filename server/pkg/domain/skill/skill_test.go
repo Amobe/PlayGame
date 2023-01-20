@@ -1,14 +1,16 @@
-package character_test
+package skill_test
 
 import (
 	"testing"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSkillHit(t *testing.T) {
-	s := character.NewSkillPoisonHit()
+	s := skill.NewSkillPoisonHit()
 
 	am := character.NewAttributeTypeMap()
 	am.Insert(character.Attribute{character.AttributeTypeATK, "10"})

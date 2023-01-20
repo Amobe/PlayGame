@@ -3,6 +3,7 @@ package inmem
 import (
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
 	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
 )
 
@@ -35,7 +36,7 @@ func NewInmemStageRepository() *StageRepository {
 	fakeStage := &stage.Stage{
 		StageID: "fake",
 		Fighter: character.RandomCharacter("fake_character"),
-		Slot:    battle.NewSlot(character.NewSkillPoisonHit()),
+		Slot:    battle.NewSlot(skill.NewSkillPoisonHit()),
 	}
 	s.Create(fakeStage)
 	return s

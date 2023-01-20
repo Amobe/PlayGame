@@ -1,16 +1,18 @@
 package battle
 
-import "github.com/Amobe/PlayGame/server/pkg/domain/character"
+import (
+	"github.com/Amobe/PlayGame/server/pkg/domain/skill"
+)
 
 type Slot struct {
-	Skills [5]character.Skill
+	Skills [5]skill.Skill
 }
 
-func NewSlot(skills ...character.Skill) Slot {
+func NewSlot(skills ...skill.Skill) Slot {
 	slot := Slot{}
 	for i, s := range skills {
 		if s == nil {
-			s = character.NewSkillEmpty()
+			s = skill.NewSkillEmpty()
 		}
 		slot.Skills[i] = s
 	}
