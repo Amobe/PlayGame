@@ -3,17 +3,20 @@ package battle_test
 import (
 	"testing"
 
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
+	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
 type fakeSkill struct {
-	usedFunc func() (aa, ta []character.Attribute)
+	usedFunc func() (aa, ta []vo.Attribute)
 }
 
-func (s fakeSkill) Use(am, dm character.AttributeTypeMap) (aa, ta []character.Attribute) {
+func (s fakeSkill) Use(am, dm vo.AttributeMap) (aa, ta []vo.Attribute) {
 	if s.usedFunc != nil {
 		return s.usedFunc()
 	}
@@ -28,11 +31,11 @@ func (s fakeSkill) Name() string {
 func TestBattle_FightUseSkill(t *testing.T) {
 	ally := character.NewCharacter(
 		"ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	isAllySkillUsed := false
 	allySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []vo.Attribute) {
 			isAllySkillUsed = true
 			return
 		},
@@ -40,11 +43,11 @@ func TestBattle_FightUseSkill(t *testing.T) {
 	allySlot := battle.NewSlot(allySkill)
 	enemy := character.NewCharacter(
 		"enemy",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	isEnemySkillUsed := false
 	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []vo.Attribute) {
 			isEnemySkillUsed = true
 			return
 		},
@@ -65,10 +68,10 @@ func TestBattle_FightInOrder(t *testing.T) {
 	var usedOrder []string
 	ally := character.NewCharacter(
 		"ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	allySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []vo.Attribute) {
 			usedOrder = append(usedOrder, "ally")
 			return
 		},
@@ -76,11 +79,11 @@ func TestBattle_FightInOrder(t *testing.T) {
 	allySlot := battle.NewSlot(allySkill)
 	enemy := character.NewCharacter(
 		"enemy",
-		character.Attribute{Type: character.AttributeTypeAGI, Value: "10"},
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(10)),
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
+		usedFunc: func() (aa, ta []vo.Attribute) {
 			usedOrder = append(usedOrder, "enemy")
 			return
 		},
@@ -100,7 +103,7 @@ func TestBattle_FightInOrder(t *testing.T) {
 func TestBattle_FightToWin(t *testing.T) {
 	ally := character.NewCharacter(
 		"ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	allySlot := battle.NewSlot(fakeSkill{})
 	enemy := character.NewCharacter("enemy")
@@ -122,7 +125,7 @@ func TestBattle_FightToLose(t *testing.T) {
 	allySlot := battle.NewSlot(fakeSkill{})
 	enemy := character.NewCharacter(
 		"enemy",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "10"},
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	enemySlot := battle.NewSlot(fakeSkill{})
 
@@ -144,15 +147,15 @@ func TestBattle_FightToLose(t *testing.T) {
 // and the ally has 1 hp left
 func TestBattle_FightToTheEnd(t *testing.T) {
 	ally := character.NewCharacter("ally",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "51"},
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(51)),
 	)
 	enemy := character.NewCharacter("enemy",
-		character.Attribute{Type: character.AttributeTypeHP, Value: "1"},
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(1)),
 	)
 	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []character.Attribute) {
-			return nil, []character.Attribute{
-				{Type: character.AttributeTypeHP, Value: "-1"},
+		usedFunc: func() (aa, ta []vo.Attribute) {
+			return nil, []vo.Attribute{
+				vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-1)),
 			}
 		},
 	}
@@ -173,6 +176,8 @@ func TestBattle_FightToTheEnd(t *testing.T) {
 	}
 
 	assert.Equal(t, 50, len(foughtEvents))
-	assert.Equal(t, 1, b.Fighter("ally").AttributeMap().Get(character.AttributeTypeHP))
+	expectedHP := decimal.NewFromInt(1)
+	actualHP := b.Fighter("ally").AttributeMap().Get(vo.AttributeTypeHP).Value
+	utils.AssertDecimal(t, expectedHP, actualHP)
 	assert.Equal(t, 1, len(drawEvents))
 }

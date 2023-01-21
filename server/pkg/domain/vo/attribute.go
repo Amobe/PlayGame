@@ -1,33 +1,21 @@
-package character
+package vo
 
-import (
-	"strconv"
-)
+import "github.com/shopspring/decimal"
 
 type Attribute struct {
 	Type  AttributeType
-	Value string
+	Value decimal.Decimal
 }
 
-func (a Attribute) GetInt() int {
-	value, err := strconv.ParseInt(a.Value, 10, 64)
-	if err != nil {
-		return 0
+func NewAttribute(attrType AttributeType, value decimal.Decimal) Attribute {
+	return Attribute{
+		Type:  attrType,
+		Value: value,
 	}
-	return int(value)
 }
 
-func (a Attribute) GetFloat() float64 {
-	value, err := strconv.ParseFloat(a.Value, 64)
-	if err != nil {
-		return 0
-	}
-	return value
-}
-
-func (a *Attribute) Add(value int) {
-	res := a.GetInt() + value
-	a.Value = strconv.Itoa(res)
+func (a Attribute) Add(value decimal.Decimal) Attribute {
+	return NewAttribute(a.Type, a.Value.Add(value))
 }
 
 type AttributeType string
@@ -55,28 +43,12 @@ const (
 	AttributeTypePoisoned AttributeType = "poisoned"
 )
 
-type AttributeTypeMap map[AttributeType]Attribute
+var defaultAttributeValue = map[AttributeType]decimal.Decimal{}
 
-func NewAttributeTypeMap() AttributeTypeMap {
-	return make(AttributeTypeMap)
-}
-
-func (a AttributeTypeMap) Insert(attrs ...Attribute) {
-	for _, attr := range attrs {
-		target, ok := a[attr.Type]
-		if !ok {
-			a[attr.Type] = attr
-			continue
-		}
-		target.Add(attr.GetInt())
-		a[attr.Type] = target
-	}
-}
-
-func (a AttributeTypeMap) Get(attributeType AttributeType) int {
-	attr, ok := a[attributeType]
+func GetDefaultAttributeValue(attributeType AttributeType) decimal.Decimal {
+	value, ok := defaultAttributeValue[attributeType]
 	if !ok {
-		return 0
+		return decimal.Zero
 	}
-	return attr.GetInt()
+	return value
 }

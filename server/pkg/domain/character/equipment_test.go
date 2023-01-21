@@ -3,7 +3,11 @@ package character_test
 import (
 	"testing"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,8 +16,8 @@ func TestEquipMajorWeapon(t *testing.T) {
 	w := character.WeaponSet["Knife"]
 	e.EquipWeapon(w)
 
-	want := []character.Attribute{
-		{character.AttributeTypeATK, "10"},
+	want := []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
 	}
 	got := e.GetAttributes()
 
@@ -25,8 +29,8 @@ func TestEquipMinorWeapon(t *testing.T) {
 	w := character.WeaponSet["Shield"]
 	e.EquipWeapon(w)
 
-	want := []character.Attribute{
-		{character.AttributeTypeDEF, "10"},
+	want := []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeDEF, decimal.NewFromInt(10)),
 	}
 	got := e.GetAttributes()
 
@@ -38,8 +42,8 @@ func TestEquipBothHandWeapon(t *testing.T) {
 	w := character.WeaponSet["Axe"]
 	e.EquipWeapon(w)
 
-	want := []character.Attribute{
-		{character.AttributeTypeATK, "25"},
+	want := []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(25)),
 	}
 	got := e.GetAttributes()
 
@@ -52,8 +56,8 @@ func TestEquipBothHandWeaponRemoveMinorWeapon(t *testing.T) {
 	e.EquipWeapon(character.WeaponSet["Shield"])
 	e.EquipWeapon(character.WeaponSet["Axe"])
 
-	want := []character.Attribute{
-		{character.AttributeTypeATK, "25"},
+	want := []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(25)),
 	}
 	got := e.GetAttributes()
 

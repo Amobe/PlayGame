@@ -2,16 +2,17 @@ package battle
 
 import (
 	"github.com/Amobe/PlayGame/server/pkg/domain/character"
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
 type Fighter interface {
-	Affect(attr []character.Attribute)
-	UseSkill(skill character.Skill, targetAttr character.AttributeTypeMap) (targetAffect []character.Attribute)
+	Affect(attr []vo.Attribute)
+	UseSkill(skill character.Skill, targetAttr vo.AttributeMap) (targetAffect []vo.Attribute)
 
 	ID() string
 	Alive() bool
-	AttributeMap() character.AttributeTypeMap
+	AttributeMap() vo.AttributeMap
 	GetAgi() int
 }
 

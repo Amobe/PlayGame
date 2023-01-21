@@ -1,5 +1,11 @@
 package character
 
+import (
+	"github.com/shopspring/decimal"
+
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
+)
+
 type Equipment struct {
 	MajorHand Weapon
 	MinorHand Weapon
@@ -31,8 +37,8 @@ func (e *Equipment) EquipWeapon(w Weapon) {
 	}
 }
 
-func (e *Equipment) GetAttributes() []Attribute {
-	var sum []Attribute
+func (e *Equipment) GetAttributes() []vo.Attribute {
+	var sum []vo.Attribute
 	sum = append(sum, e.MajorHand.Attributes...)
 	sum = append(sum, e.MinorHand.Attributes...)
 	sum = append(sum, e.Suite.Attributes...)
@@ -43,7 +49,7 @@ type Weapon struct {
 	ID         string
 	Name       WeaponName
 	Slot       WeaponSlot
-	Attributes []Attribute
+	Attributes []vo.Attribute
 }
 
 type WeaponName string
@@ -60,27 +66,27 @@ type Suite struct {
 	ID         string
 	Name       string
 	Pair       []string
-	Attributes []Attribute
+	Attributes []vo.Attribute
 }
 
 var EmptyWeapon = Weapon{"60dad481-527d-4132-bf2f-7e8eab8ce136", "MajorEmpty", WeaponSlotAny, nil}
 
 var WeaponSet = map[string]Weapon{
 	"Empty": EmptyWeapon,
-	"Knife": {"4b3867ab-e54d-4f34-a014-c2f87e1906f5", "Knife", WeaponSlotMajorHand, []Attribute{
-		{AttributeTypeATK, "10"},
+	"Knife": {"4b3867ab-e54d-4f34-a014-c2f87e1906f5", "Knife", WeaponSlotMajorHand, []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
 	}},
-	"Shield": {"de977351-4a5f-4559-8b0c-ff09337a979d", "Shield", WeaponSlotMinorHand, []Attribute{
-		{AttributeTypeDEF, "10"},
+	"Shield": {"de977351-4a5f-4559-8b0c-ff09337a979d", "Shield", WeaponSlotMinorHand, []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeDEF, decimal.NewFromInt(10)),
 	}},
-	"Book": {"c578dbe6-9758-4c4b-a9f4-22e577a2b9bb", "Book", WeaponSlotMajorHand, []Attribute{
-		{AttributeTypeMATK, "10"},
+	"Book": {"c578dbe6-9758-4c4b-a9f4-22e577a2b9bb", "Book", WeaponSlotMajorHand, []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeMATK, decimal.NewFromInt(10)),
 	}},
-	"Ball": {"d8a7a657-fb7a-4ce9-83b9-f2a833032dc0", "Ball", WeaponSlotMinorHand, []Attribute{
-		{AttributeTypeMDEF, "10"},
+	"Ball": {"d8a7a657-fb7a-4ce9-83b9-f2a833032dc0", "Ball", WeaponSlotMinorHand, []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeMDEF, decimal.NewFromInt(10)),
 	}},
-	"Axe": {"be52ce42-2a8e-4324-b84b-fbad5761f586", "Axe", WeaponSlotBothHand, []Attribute{
-		{AttributeTypeATK, "25"},
+	"Axe": {"be52ce42-2a8e-4324-b84b-fbad5761f586", "Axe", WeaponSlotBothHand, []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(25)),
 	}},
 }
 
@@ -90,16 +96,16 @@ var SuiteSet = map[string]Suite{
 	"Empty": EmptySuite,
 	"Physical": {"87d1454d-c5b9-48c3-9928-1a9e003ee9c6", "Physical",
 		[]string{"Knife", "Shield"},
-		[]Attribute{
-			{AttributeTypeATK, "10"},
-			{AttributeTypeDEF, "10"},
+		[]vo.Attribute{
+			vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
+			vo.NewAttribute(vo.AttributeTypeDEF, decimal.NewFromInt(10)),
 		},
 	},
 	"Magical": {"09a2b7e8-2943-493b-bc48-3d413e969bca", "Magical",
 		[]string{"Book", "Ball"},
-		[]Attribute{
-			{AttributeTypeMATK, "10"},
-			{AttributeTypeMDEF, "10"},
+		[]vo.Attribute{
+			vo.NewAttribute(vo.AttributeTypeMATK, decimal.NewFromInt(10)),
+			vo.NewAttribute(vo.AttributeTypeMDEF, decimal.NewFromInt(10)),
 		},
 	},
 }

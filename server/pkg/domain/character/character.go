@@ -1,8 +1,9 @@
 package character
 
 import (
-	"strconv"
+	"github.com/shopspring/decimal"
 
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
@@ -14,14 +15,14 @@ type coreAggregator = domain.CoreAggregator
 type Character struct {
 	coreAggregator
 	CharacterID string
-	Basement    AttributeTypeMap
+	Basement    vo.AttributeMap
 	Equipment   Equipment
 }
 
-func NewCharacter(id string, attrs ...Attribute) Character {
+func NewCharacter(id string, attrs ...vo.Attribute) Character {
 	c := Character{
 		CharacterID: id,
-		Basement:    NewAttributeTypeMap(),
+		Basement:    vo.NewAttributeTypeMap(),
 	}
 	c.Basement.Insert(attrs...)
 	return c
@@ -31,8 +32,8 @@ func RandomCharacter(id string) Character {
 	hp := utils.GetRandIntInRange(100, 200)
 	atk := utils.GetRandIntInRange(20, 50)
 	return NewCharacter(id,
-		Attribute{Type: AttributeTypeHP, Value: strconv.Itoa(hp)},
-		Attribute{Type: AttributeTypeATK, Value: strconv.Itoa(atk)},
+		vo.Attribute{Type: vo.AttributeTypeHP, Value: decimal.NewFromInt(int64(hp))},
+		vo.Attribute{Type: vo.AttributeTypeATK, Value: decimal.NewFromInt(int64(atk))},
 	)
 }
 
@@ -40,8 +41,8 @@ func (c Character) ID() string {
 	return c.CharacterID
 }
 
-func (c Character) AttributeMap() AttributeTypeMap {
-	res := NewAttributeTypeMap()
+func (c Character) AttributeMap() vo.AttributeMap {
+	res := vo.NewAttributeTypeMap()
 	for _, attr := range c.Basement {
 		res.Insert(attr)
 	}
@@ -52,26 +53,26 @@ func (c Character) AttributeMap() AttributeTypeMap {
 }
 
 func (c Character) GetAgi() int {
-	return c.AttributeMap().Get(AttributeTypeAGI)
+	return int(c.AttributeMap().Get(vo.AttributeTypeAGI).Value.InexactFloat64())
 }
 
 func (c Character) Alive() bool {
 	attrMap := c.AttributeMap()
-	_, ok := attrMap[AttributeTypeDead]
+	_, ok := attrMap[vo.AttributeTypeDead]
 	return !ok
 }
 
-func (c Character) Affect(attr []Attribute) {
+func (c Character) Affect(attr []vo.Attribute) {
 	c.Basement.Insert(attr...)
 
 	// dead
 	am := c.AttributeMap()
-	if am[AttributeTypeHP].GetInt() == 0 {
-		c.Basement.Insert(Attribute{Type: AttributeTypeDead})
+	if am[vo.AttributeTypeHP].Value.IsZero() {
+		c.Basement.Insert(vo.NewAttribute(vo.AttributeTypeDead, decimal.NewFromInt(1)))
 	}
 }
 
-func (c Character) UseSkill(skill Skill, targetAttr AttributeTypeMap) (targetAffect []Attribute) {
+func (c Character) UseSkill(skill Skill, targetAttr vo.AttributeMap) (targetAffect []vo.Attribute) {
 	affect, targetAffect := skill.Use(c.AttributeMap(), targetAttr)
 	c.Affect(affect)
 	return targetAffect

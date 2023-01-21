@@ -1,20 +1,21 @@
 package character
 
 import (
-	"strconv"
+	"github.com/shopspring/decimal"
 
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
 type Skill interface {
-	Use(am, dm AttributeTypeMap) (aa, ta []Attribute)
+	Use(am, dm vo.AttributeMap) (aa, ta []vo.Attribute)
 	Name() string
 }
 
 type skill struct {
 	SkillID      string
 	name         string
-	AttributeMap AttributeTypeMap
+	AttributeMap vo.AttributeMap
 }
 
 func (s skill) Name() string {
@@ -35,7 +36,7 @@ func NewSkillEmpty() SkillEmpty {
 	}
 }
 
-func (s SkillEmpty) Use(am, dm AttributeTypeMap) (aa, ta []Attribute) {
+func (s SkillEmpty) Use(am, dm vo.AttributeMap) (aa, ta []vo.Attribute) {
 	return
 }
 
@@ -44,9 +45,10 @@ type SkillPoisonHit struct {
 }
 
 func NewSkillPoisonHit() SkillPoisonHit {
-	am := NewAttributeTypeMap()
-	am.Insert(Attribute{Type: AttributeTypeSDR, Value: "1.1"})
-	am.Insert(Attribute{Type: AttributeTypeStatusH, Value: "0.5"})
+	am := vo.NewAttributeTypeMap(
+		vo.NewAttribute(vo.AttributeTypeSDR, decimal.NewFromFloat(1.1)),
+		vo.NewAttribute(vo.AttributeTypeStatusH, decimal.NewFromFloat(0.5)),
+	)
 	return SkillPoisonHit{
 		skill: skill{
 			SkillID:      "poisonHit",
@@ -56,31 +58,30 @@ func NewSkillPoisonHit() SkillPoisonHit {
 	}
 }
 
-func (h SkillPoisonHit) Use(am, dm AttributeTypeMap) (aa, ta []Attribute) {
-	atk := am[AttributeTypeATK].GetFloat()
-	def := dm[AttributeTypeDEF].GetFloat()
-	sdr := h.AttributeMap[AttributeTypeSDR].GetFloat()
-	amp := am[AttributeTypeAMP].GetFloat()
-	ampR := dm[AttributeTypeAMPR].GetFloat()
-	dI := am[AttributeTypeDI].GetFloat()
-	dR := dm[AttributeTypeDR].GetFloat()
-	cri := am[AttributeTypeCRI].GetFloat()
-	sCri := h.AttributeMap[AttributeTypeCRI].GetFloat()
-	criR := dm[AttributeTypeCRIR].GetFloat()
-	criD := am[AttributeTypeCRID].GetFloat()
-	criDR := dm[AttributeTypeCRIDR].GetFloat()
+func (h SkillPoisonHit) Use(am, dm vo.AttributeMap) (aa, ta []vo.Attribute) {
+	atk := am.Get(vo.AttributeTypeATK).Value
+	def := dm.Get(vo.AttributeTypeDEF).Value
+	sdr := h.AttributeMap.Get(vo.AttributeTypeSDR).Value
+	amp := am.Get(vo.AttributeTypeAMP).Value
+	ampR := dm.Get(vo.AttributeTypeAMPR).Value
+	dI := am.Get(vo.AttributeTypeDI).Value
+	dR := dm.Get(vo.AttributeTypeDR).Value
+	cri := am.Get(vo.AttributeTypeCRI).Value
+	sCri := h.AttributeMap.Get(vo.AttributeTypeCRI).Value
+	criR := dm.Get(vo.AttributeTypeCRIR).Value
+	criD := am.Get(vo.AttributeTypeCRID).Value
+	criDR := dm.Get(vo.AttributeTypeCRIDR).Value
 
 	// physical damage
 	damage := damageCal(atk, def, sdr, amp, ampR, cri, criR, sCri, criD, criDR, dI, dR)
-	value := strconv.Itoa(damage * -1)
-	ta = append(ta, Attribute{Type: AttributeTypeHP, Value: value})
+	ta = append(ta, vo.NewAttribute(vo.AttributeTypeHP, damage.Neg()))
 
 	// poison hit
-	sh := am[AttributeTypeStatusH].GetFloat()
-	shR := dm[AttributeTypeStatusHR].GetFloat()
-	sSh := h.AttributeMap[AttributeTypeStatusH].GetFloat()
+	sh := am.Get(vo.AttributeTypeStatusH).Value
+	shR := dm.Get(vo.AttributeTypeStatusHR).Value
+	sSh := h.AttributeMap.Get(vo.AttributeTypeStatusH).Value
 	if isStatusHit(sh, shR, sSh) {
-		ta = append(ta, Attribute{Type: AttributeTypePoisoned, Value: "1"})
+		ta = append(ta, vo.NewAttribute(vo.AttributeTypePoisoned, decimal.NewFromInt(1)))
 	}
 
 	return nil, ta
@@ -90,49 +91,56 @@ var SkillMap = map[string]Skill{
 	"poisonHit": NewSkillPoisonHit(),
 }
 
-func isCritical(cri, criR, sCri float64) bool {
-	criticalRate := cri + sCri - criR
-	return utils.GetProbabilitySampling(criticalRate)
+func isCritical(cri, criR, sCri decimal.Decimal) bool {
+	criticalRate := cri.Add(sCri).Sub(criR)
+	return utils.GetProbabilitySampling(criticalRate.InexactFloat64())
 }
 
-func isStatusHit(sh, shR, sSh float64) bool {
-	hitRate := sh + sSh - shR
-	return utils.GetProbabilitySampling(hitRate)
+func isStatusHit(sh, shR, sSh decimal.Decimal) bool {
+	hitRate := sh.Add(sSh).Sub(shR)
+	return utils.GetProbabilitySampling(hitRate.InexactFloat64())
 }
 
-func damageCal(atk, def, skillRate, amp, ampR, cri, criR, sCri, criD, criDR, dI, dR float64) int {
+func damageCal(atk, def, skillRate, amp, ampR, cri, criR, sCri, criD, criDR, dI, dR decimal.Decimal) decimal.Decimal {
 	randomFactor := randDamageFactor()
 
-	baseFactor := (atk * atk) / (atk + 2*def)
+	// baseFactor = (atk * atk) / (atk + 2*def)
+	baseFactor := atk.Mul(atk).Div(atk.Add(def.Mul(decimal.NewFromInt(2))))
 
 	skillFactor := skillDamageFactor(skillRate, amp, ampR)
 
 	criticalFactor := criticalDamageFactor(cri, criR, sCri, criD, criDR)
 
-	damangeFactor := dI - dR
+	damageFactor := dI.Sub(dR)
 
-	return int(baseFactor*skillFactor*criticalFactor*randomFactor + damangeFactor)
+	return baseFactor.Mul(skillFactor).Mul(criticalFactor).Mul(randomFactor).Add(damageFactor).Round(0)
 }
 
-func skillDamageFactor(damageRate, amp, ampR float64) float64 {
-	skillIncrease := amp - ampR
-	if skillIncrease > 0 {
-		skillIncrease = 0
+func skillDamageFactor(damageRate, amp, ampR decimal.Decimal) decimal.Decimal {
+	skillIncrease := amp.Sub(ampR)
+	if skillIncrease.IsPositive() {
+		skillIncrease = decimal.Zero
 	}
-	return damageRate + skillIncrease
+	return damageRate.Add(skillIncrease)
 }
 
-func randDamageFactor() float64 {
-	return utils.GetRandFloatInRange(0.8, 1.3)
+func randDamageFactor() decimal.Decimal {
+	factor := utils.GetRandFloatInRange(0.8, 1.3)
+	return decimal.NewFromFloat(factor)
 }
 
-func criticalDamageFactor(cri, criR, sCri, criD, criDR float64) float64 {
+func criticalDamageFactor(cri, criR, sCri, criD, criDR decimal.Decimal) decimal.Decimal {
+	var (
+		BaseFactor    = decimal.NewFromInt(1)
+		MininumFactor = decimal.NewFromFloat(1.25)
+	)
+
 	if !isCritical(cri, criR, sCri) {
-		return 1
+		return BaseFactor
 	}
-	criticalFactor := 1 + criD - criDR
-	if criticalFactor < 1.25 {
-		return 1.25
+	criticalFactor := BaseFactor.Add(criD).Sub(criDR)
+	if criticalFactor.LessThan(MininumFactor) {
+		return MininumFactor
 	}
 	return criticalFactor
 }
