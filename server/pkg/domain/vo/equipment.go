@@ -1,10 +1,6 @@
-package character
+package vo
 
-import (
-	"github.com/shopspring/decimal"
-
-	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
-)
+import "github.com/shopspring/decimal"
 
 type Equipment struct {
 	MajorHand Weapon
@@ -20,7 +16,7 @@ func NewEquipment() Equipment {
 	}
 }
 
-func (e *Equipment) EquipWeapon(w Weapon) {
+func (e Equipment) EquipWeapon(w Weapon) Equipment {
 	switch w.Slot {
 	case WeaponSlotMajorHand:
 		e.MajorHand = w
@@ -35,10 +31,15 @@ func (e *Equipment) EquipWeapon(w Weapon) {
 	if suiteName, ok := SuitePairSet[pairSet]; ok {
 		e.Suite = SuiteSet[suiteName]
 	}
+	return Equipment{
+		MajorHand: e.MajorHand,
+		MinorHand: e.MinorHand,
+		Suite:     e.Suite,
+	}
 }
 
-func (e *Equipment) GetAttributes() []vo.Attribute {
-	var sum []vo.Attribute
+func (e Equipment) GetAttributes() []Attribute {
+	var sum []Attribute
 	sum = append(sum, e.MajorHand.Attributes...)
 	sum = append(sum, e.MinorHand.Attributes...)
 	sum = append(sum, e.Suite.Attributes...)
@@ -49,7 +50,7 @@ type Weapon struct {
 	ID         string
 	Name       WeaponName
 	Slot       WeaponSlot
-	Attributes []vo.Attribute
+	Attributes []Attribute
 }
 
 type WeaponName string
@@ -66,27 +67,27 @@ type Suite struct {
 	ID         string
 	Name       string
 	Pair       []string
-	Attributes []vo.Attribute
+	Attributes []Attribute
 }
 
 var EmptyWeapon = Weapon{"60dad481-527d-4132-bf2f-7e8eab8ce136", "MajorEmpty", WeaponSlotAny, nil}
 
 var WeaponSet = map[string]Weapon{
 	"Empty": EmptyWeapon,
-	"Knife": {"4b3867ab-e54d-4f34-a014-c2f87e1906f5", "Knife", WeaponSlotMajorHand, []vo.Attribute{
-		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
+	"Knife": {"4b3867ab-e54d-4f34-a014-c2f87e1906f5", "Knife", WeaponSlotMajorHand, []Attribute{
+		NewAttribute(AttributeTypeATK, decimal.NewFromInt(10)),
 	}},
-	"Shield": {"de977351-4a5f-4559-8b0c-ff09337a979d", "Shield", WeaponSlotMinorHand, []vo.Attribute{
-		vo.NewAttribute(vo.AttributeTypeDEF, decimal.NewFromInt(10)),
+	"Shield": {"de977351-4a5f-4559-8b0c-ff09337a979d", "Shield", WeaponSlotMinorHand, []Attribute{
+		NewAttribute(AttributeTypeDEF, decimal.NewFromInt(10)),
 	}},
-	"Book": {"c578dbe6-9758-4c4b-a9f4-22e577a2b9bb", "Book", WeaponSlotMajorHand, []vo.Attribute{
-		vo.NewAttribute(vo.AttributeTypeMATK, decimal.NewFromInt(10)),
+	"Book": {"c578dbe6-9758-4c4b-a9f4-22e577a2b9bb", "Book", WeaponSlotMajorHand, []Attribute{
+		NewAttribute(AttributeTypeMATK, decimal.NewFromInt(10)),
 	}},
-	"Ball": {"d8a7a657-fb7a-4ce9-83b9-f2a833032dc0", "Ball", WeaponSlotMinorHand, []vo.Attribute{
-		vo.NewAttribute(vo.AttributeTypeMDEF, decimal.NewFromInt(10)),
+	"Ball": {"d8a7a657-fb7a-4ce9-83b9-f2a833032dc0", "Ball", WeaponSlotMinorHand, []Attribute{
+		NewAttribute(AttributeTypeMDEF, decimal.NewFromInt(10)),
 	}},
-	"Axe": {"be52ce42-2a8e-4324-b84b-fbad5761f586", "Axe", WeaponSlotBothHand, []vo.Attribute{
-		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(25)),
+	"Axe": {"be52ce42-2a8e-4324-b84b-fbad5761f586", "Axe", WeaponSlotBothHand, []Attribute{
+		NewAttribute(AttributeTypeATK, decimal.NewFromInt(25)),
 	}},
 }
 
@@ -96,16 +97,16 @@ var SuiteSet = map[string]Suite{
 	"Empty": EmptySuite,
 	"Physical": {"87d1454d-c5b9-48c3-9928-1a9e003ee9c6", "Physical",
 		[]string{"Knife", "Shield"},
-		[]vo.Attribute{
-			vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
-			vo.NewAttribute(vo.AttributeTypeDEF, decimal.NewFromInt(10)),
+		[]Attribute{
+			NewAttribute(AttributeTypeATK, decimal.NewFromInt(10)),
+			NewAttribute(AttributeTypeDEF, decimal.NewFromInt(10)),
 		},
 	},
 	"Magical": {"09a2b7e8-2943-493b-bc48-3d413e969bca", "Magical",
 		[]string{"Book", "Ball"},
-		[]vo.Attribute{
-			vo.NewAttribute(vo.AttributeTypeMATK, decimal.NewFromInt(10)),
-			vo.NewAttribute(vo.AttributeTypeMDEF, decimal.NewFromInt(10)),
+		[]Attribute{
+			NewAttribute(AttributeTypeMATK, decimal.NewFromInt(10)),
+			NewAttribute(AttributeTypeMDEF, decimal.NewFromInt(10)),
 		},
 	},
 }

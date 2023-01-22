@@ -16,7 +16,7 @@ type Character struct {
 	coreAggregator
 	CharacterID string
 	Basement    vo.AttributeMap
-	Equipment   Equipment
+	Equipment   vo.Equipment
 }
 
 func NewCharacter(id string, attrs ...vo.Attribute) Character {
