@@ -10,7 +10,7 @@ func NewAttributeTypeMap(attrs ...Attribute) AttributeMap {
 	return m
 }
 
-func (a AttributeMap) Insert(attrs ...Attribute) {
+func (a AttributeMap) Insert(attrs ...Attribute) AttributeMap {
 	for _, attr := range attrs {
 		target, ok := a[attr.Type]
 		if !ok {
@@ -19,6 +19,7 @@ func (a AttributeMap) Insert(attrs ...Attribute) {
 		}
 		a[attr.Type] = target.Add(attr.Value)
 	}
+	return a
 }
 
 func (a AttributeMap) Get(attributeType AttributeType) Attribute {

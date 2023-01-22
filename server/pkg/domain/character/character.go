@@ -72,7 +72,7 @@ func (c Character) Affect(attr []vo.Attribute) {
 	}
 }
 
-func (c Character) UseSkill(skill Skill, targetAttr vo.AttributeMap) (targetAffect []vo.Attribute) {
+func (c Character) UseSkill(skill vo.Skill, targetAttr vo.AttributeMap) (targetAffect []vo.Attribute) {
 	affect, targetAffect := skill.Use(c.AttributeMap(), targetAttr)
 	c.Affect(affect)
 	return targetAffect

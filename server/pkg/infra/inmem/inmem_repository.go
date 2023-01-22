@@ -38,7 +38,7 @@ func NewInmemStageRepository() *StageRepository {
 	fakeStage := &stage.Stage{
 		StageID: "fake",
 		Fighter: character.RandomCharacter("fake_character"),
-		Slot:    battle.NewSlot(character.NewSkillPoisonHit()),
+		Slot:    battle.NewSlot(),
 	}
 	s.Create(fakeStage)
 	return s

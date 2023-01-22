@@ -12,21 +12,6 @@ import (
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
-type fakeSkill struct {
-	usedFunc func() (aa, ta []vo.Attribute)
-}
-
-func (s fakeSkill) Use(am, dm vo.AttributeMap) (aa, ta []vo.Attribute) {
-	if s.usedFunc != nil {
-		return s.usedFunc()
-	}
-	return nil, nil
-}
-
-func (s fakeSkill) Name() string {
-	return "fakeSkill"
-}
-
 // Test skill is used in the battle fight. The ally and enemy skill should be used.
 func TestBattle_FightUseSkill(t *testing.T) {
 	ally := character.NewCharacter(
@@ -34,24 +19,20 @@ func TestBattle_FightUseSkill(t *testing.T) {
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	isAllySkillUsed := false
-	allySkill := fakeSkill{
-		usedFunc: func() (aa, ta []vo.Attribute) {
-			isAllySkillUsed = true
-			return
-		},
-	}
+	allySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
+		isAllySkillUsed = true
+		return
+	})
 	allySlot := battle.NewSlot(allySkill)
 	enemy := character.NewCharacter(
 		"enemy",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
 	isEnemySkillUsed := false
-	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []vo.Attribute) {
-			isEnemySkillUsed = true
-			return
-		},
-	}
+	enemySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
+		isEnemySkillUsed = true
+		return
+	})
 	enemySlot := battle.NewSlot(enemySkill)
 
 	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
@@ -70,24 +51,21 @@ func TestBattle_FightInOrder(t *testing.T) {
 		"ally",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
-	allySkill := fakeSkill{
-		usedFunc: func() (aa, ta []vo.Attribute) {
-			usedOrder = append(usedOrder, "ally")
-			return
-		},
-	}
+	allySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
+		usedOrder = append(usedOrder, "ally")
+		return
+	})
+
 	allySlot := battle.NewSlot(allySkill)
 	enemy := character.NewCharacter(
 		"enemy",
 		vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(10)),
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
-	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []vo.Attribute) {
-			usedOrder = append(usedOrder, "enemy")
-			return
-		},
-	}
+	enemySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
+		usedOrder = append(usedOrder, "enemy")
+		return
+	})
 	enemySlot := battle.NewSlot(enemySkill)
 
 	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
@@ -105,9 +83,9 @@ func TestBattle_FightToWin(t *testing.T) {
 		"ally",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
-	allySlot := battle.NewSlot(fakeSkill{})
+	allySlot := battle.NewSlot()
 	enemy := character.NewCharacter("enemy")
-	enemySlot := battle.NewSlot(fakeSkill{})
+	enemySlot := battle.NewSlot()
 
 	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
 	_ = b.SetAllySlot(allySlot)
@@ -122,12 +100,12 @@ func TestBattle_FightToWin(t *testing.T) {
 
 func TestBattle_FightToLose(t *testing.T) {
 	ally := character.NewCharacter("ally")
-	allySlot := battle.NewSlot(fakeSkill{})
+	allySlot := battle.NewSlot()
 	enemy := character.NewCharacter(
 		"enemy",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
-	enemySlot := battle.NewSlot(fakeSkill{})
+	enemySlot := battle.NewSlot()
 
 	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
 	_ = b.SetAllySlot(allySlot)
@@ -152,13 +130,11 @@ func TestBattle_FightToTheEnd(t *testing.T) {
 	enemy := character.NewCharacter("enemy",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(1)),
 	)
-	enemySkill := fakeSkill{
-		usedFunc: func() (aa, ta []vo.Attribute) {
-			return nil, []vo.Attribute{
-				vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-1)),
-			}
-		},
-	}
+	enemySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
+		return nil, []vo.Attribute{
+			vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-1)),
+		}
+	})
 	enemySlot := battle.NewSlot(enemySkill)
 
 	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)

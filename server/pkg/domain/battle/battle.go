@@ -125,11 +125,11 @@ func (b *Battle) Fight() error {
 		}
 		var affects []Affect
 		for _, s := range slot.Skills {
-			if s == nil {
+			if s.IsEmpty() {
 				continue
 			}
 			attrs := actor.UseSkill(s, target.AttributeMap())
-			affect := NewAffect(actor.ID(), target.ID(), s.Name(), attrs)
+			affect := NewAffect(actor.ID(), target.ID(), s.SkillType.String(), attrs)
 			affects = append(affects, affect)
 		}
 		if len(affects) > 0 {
