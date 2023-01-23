@@ -45,7 +45,7 @@ type SkillPoisonHit struct {
 }
 
 func NewSkillPoisonHit() SkillPoisonHit {
-	am := vo.NewAttributeTypeMap(
+	am := vo.NewAttributeMap(
 		vo.NewAttribute(vo.AttributeTypeSDR, decimal.NewFromFloat(1.1)),
 		vo.NewAttribute(vo.AttributeTypeStatusH, decimal.NewFromFloat(0.5)),
 	)

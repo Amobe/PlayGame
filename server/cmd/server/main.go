@@ -9,7 +9,6 @@ import (
 
 	gamev1 "github.com/Amobe/PlayGame/server/gen/proto/go/game/v1"
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
 	"github.com/Amobe/PlayGame/server/pkg/infra/inmem"
 	"github.com/Amobe/PlayGame/server/pkg/interfaces/gamegrpc"
@@ -29,9 +28,8 @@ func run() error {
 	}
 
 	deps := deps{
-		characterRepo: inmem.NewInmemCharacterRepository(),
-		stageRepo:     inmem.NewInmemStageRepository(),
-		battleRepo:    inmem.NewInmemBattleRepository(),
+		stageRepo:  inmem.NewInmemStageRepository(),
+		battleRepo: inmem.NewInmemBattleRepository(),
 	}
 
 	server := grpc.NewServer()
@@ -46,13 +44,8 @@ func run() error {
 }
 
 type deps struct {
-	characterRepo character.Repository
-	stageRepo     stage.Repository
-	battleRepo    battle.Repository
-}
-
-func (d deps) CharacterRepo() character.Repository {
-	return d.characterRepo
+	stageRepo  stage.Repository
+	battleRepo battle.Repository
 }
 
 func (d deps) StageRepo() stage.Repository {

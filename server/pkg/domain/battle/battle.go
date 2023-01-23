@@ -3,6 +3,7 @@ package battle
 import (
 	"fmt"
 
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
@@ -128,9 +129,13 @@ func (b *Battle) Fight() error {
 			if s.IsEmpty() {
 				continue
 			}
-			attrs := actor.UseSkill(s, target.AttributeMap())
-			affect := NewAffect(actor.ID(), target.ID(), s.SkillType.String(), attrs)
-			affects = append(affects, affect)
+			aa, ta := b.useSkill(s, actor, target)
+			if len(aa.Attributes) > 0 {
+				affects = append(affects, aa)
+			}
+			if len(ta.Attributes) > 0 {
+				affects = append(affects, ta)
+			}
 		}
 		if len(affects) > 0 {
 			if err := b.applyNew(EventBattleFought{Affects: affects}); err != nil {
@@ -189,6 +194,14 @@ func (b *Battle) isAllDead(ids map[string]interface{}) bool {
 	return true
 }
 
+func (b *Battle) useSkill(skill vo.Skill, actor, target Fighter) (actorAffect, targetAffect Affect) {
+	aa, ta := skill.Use(actor.AttributeMap(), target.AttributeMap())
+	skillName := skill.SkillType.String()
+	actorAffect = NewAffect(actor.ID(), target.ID(), actor.ID(), skillName, aa)
+	targetAffect = NewAffect(actor.ID(), target.ID(), target.ID(), skillName, ta)
+	return actorAffect, targetAffect
+}
+
 func (b *Battle) applyNew(events ...domain.Event) error {
 	return b.apply(true, events...)
 }
@@ -218,7 +231,7 @@ func (b *Battle) apply(new bool, events ...domain.Event) error {
 			b.allySlot = ev.AllySlot
 		case EventBattleFought:
 			for _, a := range ev.Affects {
-				b.fighterMap[a.TargetID].Affect(a.Attributes)
+				b.fighterMap[a.ChangerID] = b.fighterMap[a.ChangerID].Affect(a.Attributes)
 			}
 		case EventBattleWon:
 			b.status = StatusWon

@@ -14,8 +14,8 @@ import (
 func TestSkillHit(t *testing.T) {
 	s := character.NewSkillPoisonHit()
 
-	am := vo.NewAttributeTypeMap(vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)))
-	dm := vo.NewAttributeTypeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(100)))
+	am := vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)))
+	dm := vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(100)))
 
 	aa, da := s.Use(am, dm)
 

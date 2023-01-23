@@ -13,7 +13,7 @@ type Skill struct {
 func NewSkill(skillType SkillType, attrs ...Attribute) Skill {
 	return Skill{
 		SkillType:    skillType,
-		AttributeMap: NewAttributeTypeMap(attrs...),
+		AttributeMap: NewAttributeMap(attrs...),
 	}
 }
 

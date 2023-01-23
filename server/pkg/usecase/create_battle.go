@@ -3,9 +3,11 @@ package usecase
 import (
 	"fmt"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
@@ -19,27 +21,24 @@ type CreateBattleOutput struct {
 }
 
 type CreateBattleUsecase struct {
-	characterRepo character.Repository
-	stageRepo     stage.Repository
-	battleRepo    battle.Repository
+	stageRepo  stage.Repository
+	battleRepo battle.Repository
 }
 
 func NewCreateBattleUsecase(
-	characterRepo character.Repository, stageRepo stage.Repository, battleRepo battle.Repository,
+	stageRepo stage.Repository, battleRepo battle.Repository,
 ) *CreateBattleUsecase {
 	return &CreateBattleUsecase{
-		characterRepo: characterRepo,
-		stageRepo:     stageRepo,
-		battleRepo:    battleRepo,
+		stageRepo:  stageRepo,
+		battleRepo: battleRepo,
 	}
 }
 
 func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOutput, err error) {
-	c, err := u.characterRepo.Get(in.CharacterID)
-	if err != nil {
-		err = fmt.Errorf("character repository get: %w", err)
-		return
-	}
+	c := vo.NewCharacter(in.CharacterID, []vo.Attribute{
+		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(500)),
+		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
+	}...)
 	s, err := u.stageRepo.Get(in.StageID)
 	if err != nil {
 		err = fmt.Errorf("stage repository get: %w", err)

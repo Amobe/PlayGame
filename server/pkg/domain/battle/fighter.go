@@ -6,8 +6,7 @@ import (
 )
 
 type Fighter interface {
-	Affect(attr []vo.Attribute)
-	UseSkill(skill vo.Skill, targetAttr vo.AttributeMap) (targetAffect []vo.Attribute)
+	Affect(attr []vo.Attribute) vo.Character
 
 	ID() string
 	Alive() bool

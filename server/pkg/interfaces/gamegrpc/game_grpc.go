@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
 	"github.com/Amobe/PlayGame/server/pkg/usecase"
 
@@ -14,7 +13,6 @@ import (
 )
 
 type GameServiceDeps interface {
-	CharacterRepo() character.Repository
 	StageRepo() stage.Repository
 	BattleRepo() battle.Repository
 }
@@ -22,16 +20,14 @@ type GameServiceDeps interface {
 type GameServiceHandler struct {
 	gamev1.UnimplementedGameServiceServer
 
-	characterRepo character.Repository
-	stageRepo     stage.Repository
-	battleRepo    battle.Repository
+	stageRepo  stage.Repository
+	battleRepo battle.Repository
 }
 
 func NewGameServiceHandler(deps GameServiceDeps) *GameServiceHandler {
 	return &GameServiceHandler{
-		characterRepo: deps.CharacterRepo(),
-		stageRepo:     deps.StageRepo(),
-		battleRepo:    deps.BattleRepo(),
+		stageRepo:  deps.StageRepo(),
+		battleRepo: deps.BattleRepo(),
 	}
 }
 
@@ -41,7 +37,7 @@ func (s *GameServiceHandler) NewBattle(ctx context.Context, req *gamev1.NewBattl
 		CharacterID: "hero",
 		StageID:     "fake",
 	}
-	uc := usecase.NewCreateBattleUsecase(s.characterRepo, s.stageRepo, s.battleRepo)
+	uc := usecase.NewCreateBattleUsecase(s.stageRepo, s.battleRepo)
 	out, err := uc.Execute(in)
 	if err != nil {
 		return nil, fmt.Errorf("execute new battle usecase: %w", err)

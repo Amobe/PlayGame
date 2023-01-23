@@ -7,14 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/domain/character"
 	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
 // Test skill is used in the battle fight. The ally and enemy skill should be used.
 func TestBattle_FightUseSkill(t *testing.T) {
-	ally := character.NewCharacter(
+	ally := vo.NewCharacter(
 		"ally",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
@@ -24,7 +23,7 @@ func TestBattle_FightUseSkill(t *testing.T) {
 		return
 	})
 	allySlot := battle.NewSlot(allySkill)
-	enemy := character.NewCharacter(
+	enemy := vo.NewCharacter(
 		"enemy",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
@@ -47,7 +46,7 @@ func TestBattle_FightUseSkill(t *testing.T) {
 // Test skill is used in agi order.
 func TestBattle_FightInOrder(t *testing.T) {
 	var usedOrder []string
-	ally := character.NewCharacter(
+	ally := vo.NewCharacter(
 		"ally",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
@@ -57,7 +56,7 @@ func TestBattle_FightInOrder(t *testing.T) {
 	})
 
 	allySlot := battle.NewSlot(allySkill)
-	enemy := character.NewCharacter(
+	enemy := vo.NewCharacter(
 		"enemy",
 		vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(10)),
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
@@ -79,12 +78,18 @@ func TestBattle_FightInOrder(t *testing.T) {
 }
 
 func TestBattle_FightToWin(t *testing.T) {
-	ally := character.NewCharacter(
+	ally := vo.NewCharacter(
 		"ally",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
-	allySlot := battle.NewSlot()
-	enemy := character.NewCharacter("enemy")
+	allySkill := func(actorAttr, targetAttr vo.AttributeMap) (actorAffect, targetAffect []vo.Attribute) {
+		targetAffect = []vo.Attribute{
+			vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-10)),
+		}
+		return nil, targetAffect
+	}
+	allySlot := battle.NewSlot(vo.NewCustomSkill(allySkill))
+	enemy := vo.NewCharacter("enemy")
 	enemySlot := battle.NewSlot()
 
 	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
@@ -99,13 +104,19 @@ func TestBattle_FightToWin(t *testing.T) {
 }
 
 func TestBattle_FightToLose(t *testing.T) {
-	ally := character.NewCharacter("ally")
+	ally := vo.NewCharacter("ally")
 	allySlot := battle.NewSlot()
-	enemy := character.NewCharacter(
+	enemy := vo.NewCharacter(
 		"enemy",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
 	)
-	enemySlot := battle.NewSlot()
+	enemySkill := func(actorAttr, targetAttr vo.AttributeMap) (actorAffect, targetAffect []vo.Attribute) {
+		targetAffect = []vo.Attribute{
+			vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-10)),
+		}
+		return nil, targetAffect
+	}
+	enemySlot := battle.NewSlot(vo.NewCustomSkill(enemySkill))
 
 	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
 	_ = b.SetAllySlot(allySlot)
@@ -124,10 +135,10 @@ func TestBattle_FightToLose(t *testing.T) {
 // and the enemy should attack 50 times
 // and the ally has 1 hp left
 func TestBattle_FightToTheEnd(t *testing.T) {
-	ally := character.NewCharacter("ally",
+	ally := vo.NewCharacter("ally",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(51)),
 	)
-	enemy := character.NewCharacter("enemy",
+	enemy := vo.NewCharacter("enemy",
 		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(1)),
 	)
 	enemySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {

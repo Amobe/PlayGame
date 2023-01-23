@@ -1,8 +1,10 @@
 package vo
 
+import "github.com/Amobe/PlayGame/server/pkg/utils"
+
 type AttributeMap map[AttributeType]Attribute
 
-func NewAttributeTypeMap(attrs ...Attribute) AttributeMap {
+func NewAttributeMap(attrs ...Attribute) AttributeMap {
 	m := make(AttributeMap)
 	if len(attrs) > 0 {
 		m.Insert(attrs...)
@@ -19,7 +21,10 @@ func (a AttributeMap) Insert(attrs ...Attribute) AttributeMap {
 		}
 		a[attr.Type] = target.Add(attr.Value)
 	}
-	return a
+
+	newMap := NewAttributeMap()
+	utils.CopyMap(newMap, a)
+	return newMap
 }
 
 func (a AttributeMap) Get(attributeType AttributeType) Attribute {
