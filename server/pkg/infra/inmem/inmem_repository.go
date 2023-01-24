@@ -28,3 +28,15 @@ type BattleRepository = inmemEventStorage[battle.Battle]
 func NewInmemBattleRepository() *BattleRepository {
 	return newInmemEventStorage[battle.Battle](battle.AggregatorLoader)
 }
+
+type JobRepository = inmemStorage[vo.Job]
+
+func NewInmemJobRepository() *JobRepository {
+	return newInmemStorage[vo.Job]()
+}
+
+type WeaponRepository = inmemStorage[vo.Weapon]
+
+func NewInmemWeaponRepository() *WeaponRepository {
+	return newInmemStorage[vo.Weapon]()
+}

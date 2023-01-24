@@ -2,15 +2,21 @@ package inmem
 
 import (
 	"fmt"
-
-	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
 
-type inmemStorage[T domain.Aggregator] struct {
+var (
+	ErrorRecordNotFound = fmt.Errorf("record not found")
+)
+
+type Indexer interface {
+	ID() string
+}
+
+type inmemStorage[T Indexer] struct {
 	storage map[string]T
 }
 
-func newInmemStorage[T domain.Aggregator]() *inmemStorage[T] {
+func newInmemStorage[T Indexer]() *inmemStorage[T] {
 	return &inmemStorage[T]{
 		storage: make(map[string]T),
 	}
@@ -24,7 +30,7 @@ func (i *inmemStorage[T]) Create(v T) error {
 func (i *inmemStorage[T]) Get(id string) (v T, err error) {
 	v, ok := i.storage[id]
 	if !ok {
-		err = fmt.Errorf("not found")
+		err = ErrorRecordNotFound
 		return
 	}
 	return v, nil
