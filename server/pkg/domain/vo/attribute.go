@@ -20,7 +20,21 @@ func (a Attribute) Add(value decimal.Decimal) Attribute {
 
 type AttributeType string
 
+func (a AttributeType) String() string {
+	return string(a)
+}
+
+func ToAttributeType(s string) AttributeType {
+	t, ok := attributeTypeMap[s]
+	if !ok {
+		return AttributeTypeUnspecified
+	}
+	return t
+}
+
 const (
+	AttributeTypeUnspecified AttributeType = "unspecified"
+	// basement attributes
 	AttributeTypeHP       AttributeType = "hp"
 	AttributeTypeAGI      AttributeType = "agi"
 	AttributeTypeATK      AttributeType = "atk"
@@ -38,10 +52,43 @@ const (
 	AttributeTypeDI       AttributeType = "di"  // damage increase
 	AttributeTypeDR       AttributeType = "dr"  // damage reduce
 	AttributeTypeSDR      AttributeType = "sdr" // skill damage rate
+	// skill attributes
+	AttributeTypeTarget AttributeType = "target"
+	AttributeTypeCD     AttributeType = "cd"
+	AttributeTypeFCD    AttributeType = "firstcd"
+	AttributeTypeATKB   AttributeType = "atkbonus"
+	AttributeTypeMATKB  AttributeType = "matkbonus"
 
 	AttributeTypeDead     AttributeType = "dead"
 	AttributeTypePoisoned AttributeType = "poisoned"
 )
+
+var attributeTypeMap = map[string]AttributeType{
+	AttributeTypeHP.String():       AttributeTypeHP,
+	AttributeTypeAGI.String():      AttributeTypeAGI,
+	AttributeTypeATK.String():      AttributeTypeATK,
+	AttributeTypeDEF.String():      AttributeTypeDEF,
+	AttributeTypeMATK.String():     AttributeTypeMATK,
+	AttributeTypeMDEF.String():     AttributeTypeMDEF,
+	AttributeTypeCRI.String():      AttributeTypeCRI,
+	AttributeTypeCRIR.String():     AttributeTypeCRIR,
+	AttributeTypeCRID.String():     AttributeTypeCRID,
+	AttributeTypeCRIDR.String():    AttributeTypeCRIDR,
+	AttributeTypeAMP.String():      AttributeTypeAMP,
+	AttributeTypeAMPR.String():     AttributeTypeAMPR,
+	AttributeTypeStatusH.String():  AttributeTypeStatusH,
+	AttributeTypeStatusHR.String(): AttributeTypeStatusHR,
+	AttributeTypeDI.String():       AttributeTypeDI,
+	AttributeTypeDR.String():       AttributeTypeDR,
+	AttributeTypeSDR.String():      AttributeTypeSDR,
+	AttributeTypeTarget.String():   AttributeTypeTarget,
+	AttributeTypeCD.String():       AttributeTypeCD,
+	AttributeTypeFCD.String():      AttributeTypeFCD,
+	AttributeTypeATKB.String():     AttributeTypeATKB,
+	AttributeTypeMATKB.String():    AttributeTypeMATKB,
+	AttributeTypeDead.String():     AttributeTypeDead,
+	AttributeTypePoisoned.String(): AttributeTypePoisoned,
+}
 
 var defaultAttributeValue = map[AttributeType]decimal.Decimal{}
 

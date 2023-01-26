@@ -1,27 +1,38 @@
 package vo
 
-var SkillEmpty = NewSkill(SkillTypeEmpty)
+var SkillEmpty = Skill{
+	SkillType: SkillTypeEmpty,
+}
 
 type SkillUseFn func(actorAttr, targetAttr AttributeMap) (actorAffect, targetAffect []Attribute)
 
 type Skill struct {
+	SkillID      string
 	SkillType    SkillType
+	Name         string
 	AttributeMap AttributeMap
 	UseFn        SkillUseFn
 }
 
-func NewSkill(skillType SkillType, attrs ...Attribute) Skill {
+func NewSkill(skillID string, name string, attrs ...Attribute) Skill {
 	return Skill{
-		SkillType:    skillType,
+		SkillID:      skillID,
+		Name:         name,
+		SkillType:    SkillTypeNormal,
 		AttributeMap: NewAttributeMap(attrs...),
 	}
 }
 
 func NewCustomSkill(useFn SkillUseFn) Skill {
 	return Skill{
-		SkillType: SkillTypeCustom,
+		Name:      "custom_skill",
+		SkillType: SkillTypeNormal,
 		UseFn:     useFn,
 	}
+}
+
+func (s Skill) ID() string {
+	return s.SkillID
 }
 
 func (s Skill) Use(actorAttr, targetAttr AttributeMap) (actorAffect, targetAffect []Attribute) {
@@ -42,10 +53,6 @@ func (s SkillType) String() string {
 }
 
 const (
-	SkillTypeCustom SkillType = "custom"
+	SkillTypeNormal SkillType = "normal"
 	SkillTypeEmpty  SkillType = "empty"
-	SkillTypeSlash  SkillType = "slash"
-	SkillTypeBlock  SkillType = "block"
-	SkillTypeStab   SkillType = "stab"
-	SkillTypeHack   SkillType = "hack"
 )

@@ -38,12 +38,10 @@ func (e Equipment) EquipWeapon(w Weapon) Equipment {
 	}
 }
 
-func (e Equipment) GetAttributes() []Attribute {
-	var sum []Attribute
-	sum = append(sum, e.MajorHand.Attributes...)
-	sum = append(sum, e.MinorHand.Attributes...)
-	sum = append(sum, e.Suite.Attributes...)
-	return sum
+func (e Equipment) GetAttributes() AttributeMap {
+	m := MergeAttributeMap(e.MajorHand.AttributeMap, e.MinorHand.AttributeMap)
+	m = m.Insert(e.Suite.Attributes...)
+	return m
 }
 
 type Suite struct {

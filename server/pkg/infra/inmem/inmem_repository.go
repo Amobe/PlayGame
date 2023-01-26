@@ -8,10 +8,10 @@ import (
 
 var _ stage.Repository = &StageRepository{}
 
-type StageRepository = inmemStorage[*stage.Stage]
+type StageRepository = InmemStorage[*stage.Stage]
 
 func NewInmemStageRepository() *StageRepository {
-	s := newInmemStorage[*stage.Stage]()
+	s := NewInmemStorage[*stage.Stage]()
 	fakeStage := &stage.Stage{
 		StageID: "fake",
 		Fighter: vo.RandomCharacter("fake_character"),
@@ -27,16 +27,4 @@ type BattleRepository = inmemEventStorage[battle.Battle]
 
 func NewInmemBattleRepository() *BattleRepository {
 	return newInmemEventStorage[battle.Battle](battle.AggregatorLoader)
-}
-
-type JobRepository = inmemStorage[vo.Job]
-
-func NewInmemJobRepository() *JobRepository {
-	return newInmemStorage[vo.Job]()
-}
-
-type WeaponRepository = inmemStorage[vo.Weapon]
-
-func NewInmemWeaponRepository() *WeaponRepository {
-	return newInmemStorage[vo.Weapon]()
 }

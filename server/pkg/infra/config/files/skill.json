@@ -1,0 +1,79 @@
+[
+  {
+    "id": "skill_10001",
+    "name": "揮擊",
+    "target": 2,
+    "firstcd": 0,
+    "cd": 2,
+    "atkbonus": 1.4
+  },
+  {
+    "id": "skill_10002",
+    "name": "刺擊",
+    "target": 1,
+    "firstcd": 0,
+    "cd": 1,
+    "atkbonus": 1.8
+  },
+  {
+    "id": "skill_10003",
+    "name": "散射",
+    "target": 5,
+    "firstcd": 0,
+    "cd": 2,
+    "atkbonus": 0.6
+  },
+  {
+    "id": "skill_10004",
+    "name": "砍劈",
+    "target": 1,
+    "firstcd": 0,
+    "cd": 3,
+    "atkbonus": 5
+  },
+  {
+    "id": "skill_10005",
+    "name": "初階魔法攻擊",
+    "target": 4,
+    "firstcd": 0,
+    "cd": 3,
+    "matkbonus": 3
+  },
+  {
+    "id": "skill_10006",
+    "name": "魔擊術",
+    "target": 1,
+    "firstcd": 0,
+    "cd": 2,
+    "matkbonus": 2.1
+  },
+  {
+    "id": "skill_10007",
+    "name": "治癒魔法",
+    "target": -1,
+    "firstcd": 0,
+    "cd": 1,
+    "matkbonus": 1.2
+  },
+  {
+    "id": "skill_10008",
+    "name": "強酸魔法",
+    "target": 1,
+    "firstcd": 0,
+    "cd": 2,
+    "matkbonus": 9
+  },
+  {
+    "id": "skill_10009",
+    "name": "鋼鐵箭袋",
+    "target": -6,
+    "firstcd": 1,
+    "cd": 1
+  },
+  {
+    "id": "skill_10010",
+    "name": "格檔盾",
+    "target": -6,
+    "firstcd": 1
+  }
+]

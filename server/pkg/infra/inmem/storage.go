@@ -12,22 +12,22 @@ type Indexer interface {
 	ID() string
 }
 
-type inmemStorage[T Indexer] struct {
+type InmemStorage[T Indexer] struct {
 	storage map[string]T
 }
 
-func newInmemStorage[T Indexer]() *inmemStorage[T] {
-	return &inmemStorage[T]{
+func NewInmemStorage[T Indexer]() *InmemStorage[T] {
+	return &InmemStorage[T]{
 		storage: make(map[string]T),
 	}
 }
 
-func (i *inmemStorage[T]) Create(v T) error {
+func (i *InmemStorage[T]) Create(v T) error {
 	i.storage[v.ID()] = v
 	return nil
 }
 
-func (i *inmemStorage[T]) Get(id string) (v T, err error) {
+func (i *InmemStorage[T]) Get(id string) (v T, err error) {
 	v, ok := i.storage[id]
 	if !ok {
 		err = ErrorRecordNotFound
@@ -36,12 +36,12 @@ func (i *inmemStorage[T]) Get(id string) (v T, err error) {
 	return v, nil
 }
 
-func (i *inmemStorage[T]) Save(v T) error {
+func (i *InmemStorage[T]) Save(v T) error {
 	i.storage[v.ID()] = v
 	return nil
 }
 
-func (i *inmemStorage[T]) Delete(id string) error {
+func (i *InmemStorage[T]) Delete(id string) error {
 	delete(i.storage, id)
 	return nil
 }

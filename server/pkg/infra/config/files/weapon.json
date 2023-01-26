@@ -1,44 +1,72 @@
-{
-  "weapons": [
-    {
-      "id": "1",
-      "type": "knife",
-      "name": "basic_knife",
-      "slot": "major",
-      "attributes": {
-        "atk": 10,
-        "skill": "slash"
-      }
-    },
-    {
-      "id": "2",
-      "type": "shield",
-      "name": "basic_shield",
-      "slot": "minor",
-      "attributes": {
-        "def": 10,
-        "skill": "block"
-      }
-    },
-    {
-      "id": "3",
-      "type": "dagger",
-      "name": "basic_dagger",
-      "slot": "any",
-      "attributes": {
-        "atk": 5,
-        "skill": "stab"
-      }
-    },
-    {
-      "id": "4",
-      "type": "axe",
-      "name": "basic_axe",
-      "slot": "both",
-      "attributes": {
-        "atk": 20,
-        "skill": "hack"
-      }
-    }
-  ]
-}
+[
+  {
+    "id": "weapon_1",
+    "type": "knife",
+    "rarity": "normal",
+    "name": "basic_knife",
+    "skill": "skill_10001"
+  },
+  {
+    "id": "weapon_2",
+    "type": "dagger",
+    "rarity": "normal",
+    "name": "basic_dagger",
+    "skill": "skill_10002"
+  },
+  {
+    "id": "weapon_3",
+    "type": "bow",
+    "rarity": "normal",
+    "name": "basic_bow",
+    "skill": "skill_10003"
+  },
+  {
+    "id": "weapon_4",
+    "type": "axe",
+    "rarity": "normal",
+    "name": "basic_axe",
+    "skill": "skill_10004"
+  },
+  {
+    "id": "weapon_5",
+    "type": "rod",
+    "rarity": "normal",
+    "name": "basic_rod",
+    "skill": "skill_10005"
+  },
+  {
+    "id": "weapon_6",
+    "type": "wand",
+    "rarity": "normal",
+    "name": "basic_wand",
+    "skill": "skill_10006"
+  },
+  {
+    "id": "weapon_7",
+    "type": "orb",
+    "rarity": "normal",
+    "name": "basic_orb",
+    "skill": "skill_10007"
+  },
+  {
+    "id": "weapon_8",
+    "type": "book",
+    "rarity": "normal",
+    "name": "basic_book",
+    "skill": "skill_10008"
+  },
+  {
+    "id": "weapon_9",
+    "type": "arrow",
+    "rarity": "normal",
+    "name": "basic_arrow",
+    "skill": "skill_10009"
+  },
+  {
+    "id": "weapon_10",
+    "type": "shield",
+    "rarity": "normal",
+    "name": "basic_shield",
+    "skill": "skill_10010"
+  }
+]

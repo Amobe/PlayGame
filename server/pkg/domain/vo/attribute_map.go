@@ -4,8 +4,12 @@ import "github.com/Amobe/PlayGame/server/pkg/utils"
 
 type AttributeMap map[AttributeType]Attribute
 
+func newAttributeMap() AttributeMap {
+	return make(AttributeMap)
+}
+
 func NewAttributeMap(attrs ...Attribute) AttributeMap {
-	m := make(AttributeMap)
+	m := newAttributeMap()
 	if len(attrs) > 0 {
 		m.Insert(attrs...)
 	}
@@ -14,16 +18,30 @@ func NewAttributeMap(attrs ...Attribute) AttributeMap {
 
 func (a AttributeMap) Insert(attrs ...Attribute) AttributeMap {
 	for _, attr := range attrs {
-		target, ok := a[attr.Type]
-		if !ok {
-			a[attr.Type] = attr
-			continue
-		}
-		a[attr.Type] = target.Add(attr.Value)
+		a.insert(attr)
 	}
 
-	newMap := NewAttributeMap()
+	newMap := newAttributeMap()
 	utils.CopyMap(newMap, a)
+	return newMap
+}
+
+func (a AttributeMap) insert(attr Attribute) {
+	target, ok := a[attr.Type]
+	if !ok {
+		a[attr.Type] = attr
+		return
+	}
+	a[attr.Type] = target.Add(attr.Value)
+}
+
+func MergeAttributeMap(maps ...AttributeMap) AttributeMap {
+	newMap := newAttributeMap()
+	for _, m := range maps {
+		for _, v := range m {
+			newMap.insert(v)
+		}
+	}
 	return newMap
 }
 
