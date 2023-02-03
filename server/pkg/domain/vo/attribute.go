@@ -52,6 +52,9 @@ const (
 	AttributeTypeDI       AttributeType = "di"  // damage increase
 	AttributeTypeDR       AttributeType = "dr"  // damage reduce
 	AttributeTypeSDR      AttributeType = "sdr" // skill damage rate
+	AttributeTypeHR       AttributeType = "hr"  // heal rate
+	AttributeTypeHit      AttributeType = "hit"
+	AttributeTypeDodge    AttributeType = "dodge"
 	// skill attributes
 	AttributeTypeTarget AttributeType = "target"
 	AttributeTypeCD     AttributeType = "cd"
@@ -81,6 +84,9 @@ var attributeTypeMap = map[string]AttributeType{
 	AttributeTypeDI.String():       AttributeTypeDI,
 	AttributeTypeDR.String():       AttributeTypeDR,
 	AttributeTypeSDR.String():      AttributeTypeSDR,
+	AttributeTypeHR.String():       AttributeTypeHR,
+	AttributeTypeHit.String():      AttributeTypeHit,
+	AttributeTypeDodge.String():    AttributeTypeDodge,
 	AttributeTypeTarget.String():   AttributeTypeTarget,
 	AttributeTypeCD.String():       AttributeTypeCD,
 	AttributeTypeFCD.String():      AttributeTypeFCD,
