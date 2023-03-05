@@ -55,6 +55,7 @@ const (
 	AttributeTypeHR       AttributeType = "hr"  // heal rate
 	AttributeTypeHit      AttributeType = "hit"
 	AttributeTypeDodge    AttributeType = "dodge"
+	AttributeTypeDamage   AttributeType = "damage"
 	// skill attributes
 	AttributeTypeTarget AttributeType = "target"
 	AttributeTypeCD     AttributeType = "cd"

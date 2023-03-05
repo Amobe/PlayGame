@@ -28,3 +28,11 @@ func GetRandFloatInRange(min, max float64) float64 {
 func GetRandIntInRange(min, max int) int {
 	return min + rand.Intn(max-min)
 }
+
+func GetRandIntInRangeN(min, max, n int) []int {
+	res := make([]int, 0, n)
+	for i := 0; i < n; i++ {
+		res = append(res, GetRandIntInRange(min, max))
+	}
+	return res
+}

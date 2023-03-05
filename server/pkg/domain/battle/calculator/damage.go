@@ -24,6 +24,7 @@ type damageAttackerAttribute struct {
 	criD        decimal.Decimal
 	di          decimal.Decimal
 	hit         decimal.Decimal
+	damageType  damageType
 }
 
 func BuildDamageAttackerAttribute(skillAttr, characterAttr vo.AttributeMap) damageAttackerAttribute {
@@ -37,6 +38,7 @@ func BuildDamageAttackerAttribute(skillAttr, characterAttr vo.AttributeMap) dama
 		criD:        characterAttr.Get(vo.AttributeTypeCRID).Value,
 		di:          characterAttr.Get(vo.AttributeTypeDI).Value,
 		hit:         characterAttr.Get(vo.AttributeTypeHit).Value,
+		damageType:  damageTypePhysical,
 	}
 }
 
@@ -62,14 +64,14 @@ func BuildDamageTargetAttribute(characterAttr vo.AttributeMap) damageTargetAttri
 	}
 }
 
-func CalculateDamage(damageType damageType, daa damageAttackerAttribute, dta damageTargetAttribute) (damage decimal.Decimal, targetDodge bool) {
-	if isTargetDodge(daa.hit, dta.dodge) {
-		return decimal.Zero, true
+func CalculateDamage(daa damageAttackerAttribute, dta damageTargetAttribute) (damage decimal.Decimal, hit bool) {
+	if !isHit(daa.hit, dta.dodge) {
+		return decimal.Zero, false
 	}
 
 	randomFactor := randDamageFactor()
 
-	baseFactor := baseDamageFactor(damageType, daa, dta)
+	baseFactor := baseDamageFactor(daa, dta)
 
 	skillFactor := skillDamageFactor(daa, dta)
 
@@ -81,9 +83,9 @@ func CalculateDamage(damageType damageType, daa damageAttackerAttribute, dta dam
 	return baseFactor.Mul(skillFactor).Mul(criticalFactor).Mul(randomFactor).Add(damageFactor).Round(0), false
 }
 
-func baseDamageFactor(damageType damageType, daa damageAttackerAttribute, dta damageTargetAttribute) decimal.Decimal {
+func baseDamageFactor(daa damageAttackerAttribute, dta damageTargetAttribute) decimal.Decimal {
 	atk, def := daa.atk, dta.def
-	if damageType == damageTypeMagical {
+	if daa.damageType == damageTypeMagical {
 		atk, def = daa.matk, dta.mdef
 	}
 	numerator := atk.Mul(atk)
@@ -129,10 +131,9 @@ func isCritical(cri, criR, sCri decimal.Decimal) bool {
 	return utils.GetProbabilitySampling(criticalRate.InexactFloat64())
 }
 
-func isTargetDodge(attackerHit, targetDodge decimal.Decimal) bool {
+func isHit(attackerHit, targetDodge decimal.Decimal) bool {
 	hitRate := calculateHitRate(attackerHit, targetDodge)
-	isHit := utils.GetProbabilitySampling(hitRate.InexactFloat64())
-	return !isHit
+	return utils.GetProbabilitySampling(hitRate.InexactFloat64())
 }
 
 func calculateHitRate(attackerHit, targetDodge decimal.Decimal) decimal.Decimal {
