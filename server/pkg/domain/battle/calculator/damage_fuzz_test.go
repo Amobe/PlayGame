@@ -14,7 +14,7 @@ func FuzzBaseDamageFactor_Physical(f *testing.F) {
 		ta := damageTargetAttribute{
 			def: decimal.NewFromInt(int64(def)),
 		}
-		_ = baseDamageFactor(damageTypePhysical, aa, ta)
+		_ = baseDamageFactor(aa, ta)
 	})
 }
 
@@ -26,7 +26,7 @@ func FuzzBaseDamageFactor_Magical(f *testing.F) {
 		ta := damageTargetAttribute{
 			mdef: decimal.NewFromInt(int64(mdef)),
 		}
-		_ = baseDamageFactor(damageTypeMagical, aa, ta)
+		_ = baseDamageFactor(aa, ta)
 	})
 }
 

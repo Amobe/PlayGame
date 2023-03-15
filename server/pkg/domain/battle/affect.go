@@ -5,26 +5,13 @@ import (
 )
 
 type Affect struct {
-	ActorID    string
 	ActorIdx   GroundIdx
-	TargetID   string
 	TargetIdx  GroundIdx
-	ChangerID  string
 	Skill      string
 	Attributes []vo.Attribute
 }
 
-func NewAffect(actorID, targetID, changerID, skillName string, attrs []vo.Attribute) Affect {
-	return Affect{
-		ActorID:    actorID,
-		TargetID:   targetID,
-		ChangerID:  changerID,
-		Skill:      skillName,
-		Attributes: attrs,
-	}
-}
-
-func NewAffectV2(actorIdx, targetIdx GroundIdx, skillType string, attrs []vo.Attribute) Affect {
+func NewAffect(actorIdx, targetIdx GroundIdx, skillType string, attrs []vo.Attribute) Affect {
 	return Affect{
 		ActorIdx:   actorIdx,
 		TargetIdx:  targetIdx,

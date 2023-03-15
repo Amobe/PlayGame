@@ -16,8 +16,8 @@ func BatchAffectToPB(al []battle.Affect) []*gamev1.FightAffect {
 
 func AffectToPB(a battle.Affect) *gamev1.FightAffect {
 	return &gamev1.FightAffect{
-		ActorId:    a.ActorID,
-		TargetId:   a.TargetID,
+		ActorIdx:   a.ActorIdx.ToInt32(),
+		TargetIdx:  a.TargetIdx.ToInt32(),
 		Skill:      a.Skill,
 		Attributes: BatchAttributeToPB(a.Attributes),
 	}

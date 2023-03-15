@@ -48,6 +48,10 @@ func (g GroundIdx) GetOppositeIdx() GroundIdx {
 	return g + 6
 }
 
+func (g GroundIdx) ToInt32() int32 {
+	return int32(g)
+}
+
 // CampIdx is the index of the camp slots.
 // The camp slots only contain the minions with same camp.
 // The CampIdx of the minions is between 1 and 5.
@@ -115,7 +119,19 @@ func NewMinionSlot(allyMinions, enemyMinions Minions) *MinionSlot {
 	}
 }
 
-func (s *MinionSlot) Act(actorIdx GroundIdx) []Affect {
+func (s *MinionSlot) PlayOneRound() []Affect {
+	var affects []Affect
+	actionOrder := s.getActionOrder()
+	for _, actorIdx := range actionOrder {
+		affects = append(affects, s.act(actorIdx)...)
+		if s.Status != MinionSlotStatusStarted {
+			break
+		}
+	}
+	return affects
+}
+
+func (s *MinionSlot) act(actorIdx GroundIdx) []Affect {
 	attacker, targets := s.getAttackerAndTargets(actorIdx)
 	if attacker.IsDead() {
 		return nil
@@ -202,7 +218,7 @@ func (s *MinionSlot) attack(attacker Unit, target Unit) Affect {
 		},
 	}
 	s.unitTakeAffect(target, affects)
-	return NewAffectV2(attacker.GetGroundIdx(), target.GetGroundIdx(), skill.Name, affects)
+	return NewAffect(attacker.GetGroundIdx(), target.GetGroundIdx(), skill.Name, affects)
 }
 
 func calculateAttackDamage(attacker, target Unit, skill vo.Skill) (damage decimal.Decimal, isHit bool) {

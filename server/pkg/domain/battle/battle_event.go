@@ -7,34 +7,11 @@ type coreEvent = domain.CoreEvent
 type EventBattleCreated struct {
 	coreEvent
 	BattleID   string
-	FighterMap map[string]Fighter
-	TargetMap  map[string]string
-	AllyMap    map[string]interface{}
-	EnemyMap   map[string]interface{}
-	EnemySlot  Slot
-	Order      []string // the order of the action, contains a list of character ID
+	MinionSlot *MinionSlot
 }
 
 func (EventBattleCreated) Name() string {
 	return "battle_created"
-}
-
-type EventBattleAllySlotSet struct {
-	coreEvent
-	AllySlot Slot
-}
-
-func (EventBattleAllySlotSet) Name() string {
-	return "battle_ally_slot_Set"
-}
-
-type EventBattleFought struct {
-	coreEvent
-	Affects []Affect
-}
-
-func (EventBattleFought) Name() string {
-	return "battle_fought"
 }
 
 type EventBattleWon struct {

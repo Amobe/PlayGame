@@ -3,168 +3,88 @@ package battle_test
 import (
 	"testing"
 
-	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
-	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
-// Test skill is used in the battle fight. The ally and enemy skill should be used.
-func TestBattle_FightUseSkill(t *testing.T) {
-	ally := vo.NewCharacter(
-		"ally",
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
-	)
-	isAllySkillUsed := false
-	allySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
-		isAllySkillUsed = true
-		return
-	})
-	allySlot := battle.NewSlot(allySkill)
-	enemy := vo.NewCharacter(
-		"enemy",
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
-	)
-	isEnemySkillUsed := false
-	enemySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
-		isEnemySkillUsed = true
-		return
-	})
-	enemySlot := battle.NewSlot(enemySkill)
-
-	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
-	b.SetAllySlot(allySlot)
-
-	err := b.Fight()
+func TestBattle_Create(t *testing.T) {
+	allyMinions := battle.Minions{}
+	enemyMinions := battle.Minions{}
+	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
+	b, err := battle.CreateBattle("1", minionSlot)
 	assert.NoError(t, err)
-	assert.True(t, isAllySkillUsed)
-	assert.True(t, isEnemySkillUsed)
+	assert.Equal(t, "1", b.ID())
+	assert.Equal(t, battle.StatusUnspecified, b.Status())
+	assert.Equal(t, minionSlot, b.MinionSlot())
 }
 
-// Test skill is used in agi order.
-func TestBattle_FightInOrder(t *testing.T) {
-	var usedOrder []string
-	ally := vo.NewCharacter(
-		"ally",
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
-	)
-	allySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
-		usedOrder = append(usedOrder, "ally")
-		return
-	})
+func getSummoner(isDead bool) *battle.MockUnit {
+	u := &battle.MockUnit{}
+	u.On("GetAgi").Return(0)
+	u.On("IsDead").Return(isDead)
+	return u
+}
 
-	allySlot := battle.NewSlot(allySkill)
-	enemy := vo.NewCharacter(
-		"enemy",
-		vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(10)),
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
-	)
-	enemySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
-		usedOrder = append(usedOrder, "enemy")
-		return
-	})
-	enemySlot := battle.NewSlot(enemySkill)
+func getUnit(isDead bool) *battle.MockUnit {
+	u := &battle.MockUnit{}
+	u.On("IsDead").Return(isDead)
+	u.On("GetSkill").Return(vo.Skill{})
+	return u
+}
 
-	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
-	_ = b.SetAllySlot(allySlot)
+func getDeadUnit() *battle.MockUnit {
+	return getUnit(true)
+}
 
-	err := b.Fight()
-
-	want := []string{"enemy", "ally"}
+func TestBattle_FightToTheEnd_Draw(t *testing.T) {
+	allyMinions := battle.Minions{
+		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
+	}
+	enemyMinions := battle.Minions{
+		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
+	}
+	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
+	b, err := battle.CreateBattle("1", minionSlot)
 	assert.NoError(t, err)
-	assert.Equal(t, want, usedOrder)
+
+	affects, err := b.FightToTheEnd()
+	assert.NoError(t, err)
+	assert.Zero(t, len(affects))
+	assert.Equalf(t, battle.StatusDraw, b.Status(), "battle status should be draw, but got %s", b.Status())
 }
 
-func TestBattle_FightToWin(t *testing.T) {
-	ally := vo.NewCharacter(
-		"ally",
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
-	)
-	allySkill := func(actorAttr, targetAttr vo.AttributeMap) (actorAffect, targetAffect []vo.Attribute) {
-		targetAffect = []vo.Attribute{
-			vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-10)),
-		}
-		return nil, targetAffect
+func TestBattle_FightToTheEnd_AllyWon(t *testing.T) {
+	allyMinions := battle.Minions{
+		getUnit(false), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
 	}
-	allySlot := battle.NewSlot(vo.NewCustomSkill(allySkill))
-	enemy := vo.NewCharacter("enemy")
-	enemySlot := battle.NewSlot()
+	enemyMinions := battle.Minions{
+		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(true),
+	}
+	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
+	b, err := battle.CreateBattle("1", minionSlot)
+	assert.NoError(t, err)
 
-	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
-	_ = b.SetAllySlot(allySlot)
-	_ = b.Fight()
-
-	assert.Equal(t, battle.StatusWon, b.Status())
-
-	events := b.Events()
-	lastEvent := events[len(events)-1]
-	assert.IsType(t, battle.EventBattleWon{}, lastEvent)
+	affects, err := b.FightToTheEnd()
+	assert.NoError(t, err)
+	assert.Zero(t, len(affects))
+	assert.Equalf(t, battle.StatusWon, b.Status(), "battle status should be won, but got %s", b.Status())
 }
 
-func TestBattle_FightToLose(t *testing.T) {
-	ally := vo.NewCharacter("ally")
-	allySlot := battle.NewSlot()
-	enemy := vo.NewCharacter(
-		"enemy",
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
-	)
-	enemySkill := func(actorAttr, targetAttr vo.AttributeMap) (actorAffect, targetAffect []vo.Attribute) {
-		targetAffect = []vo.Attribute{
-			vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-10)),
-		}
-		return nil, targetAffect
+func TestBattle_FightToTheEnd_AllyLost(t *testing.T) {
+	alleyMinions := battle.Minions{
+		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(true),
 	}
-	enemySlot := battle.NewSlot(vo.NewCustomSkill(enemySkill))
-
-	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
-	_ = b.SetAllySlot(allySlot)
-	_ = b.Fight()
-
-	assert.Equal(t, battle.StatusLost, b.Status())
-
-	events := b.Events()
-	lastEvent := events[len(events)-1]
-	assert.IsType(t, battle.EventBattleLost{}, lastEvent)
-}
-
-// give an ally has 51 hp, and an enemy attack ally take 1 hp a time.
-// when fight number reach to 50 round limitation
-// then the battle should be draw
-// and the enemy should attack 50 times
-// and the ally has 1 hp left
-func TestBattle_FightToTheEnd(t *testing.T) {
-	ally := vo.NewCharacter("ally",
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(51)),
-	)
-	enemy := vo.NewCharacter("enemy",
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(1)),
-	)
-	enemySkill := vo.NewCustomSkill(func(actorAttr, targetAttr vo.AttributeMap) (aa, ta []vo.Attribute) {
-		return nil, []vo.Attribute{
-			vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-1)),
-		}
-	})
-	enemySlot := battle.NewSlot(enemySkill)
-
-	b, _ := battle.CreateBattle("", ally, enemy, enemySlot)
-	_ = b.FightToTheEnd()
-
-	var foughtEvents []battle.EventBattleFought
-	var drawEvents []battle.EventBattleDraw
-	for _, battleEvent := range b.Events() {
-		switch event := battleEvent.(type) {
-		case battle.EventBattleFought:
-			foughtEvents = append(foughtEvents, event)
-		case battle.EventBattleDraw:
-			drawEvents = append(drawEvents, event)
-		}
+	enemyMinions := battle.Minions{
+		getUnit(false), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
 	}
+	minionSlot := battle.NewMinionSlot(alleyMinions, enemyMinions)
+	b, err := battle.CreateBattle("1", minionSlot)
+	assert.NoError(t, err)
 
-	assert.Equal(t, 50, len(foughtEvents))
-	expectedHP := decimal.NewFromInt(1)
-	actualHP := b.Fighter("ally").AttributeMap().Get(vo.AttributeTypeHP).Value
-	utils.AssertDecimal(t, expectedHP, actualHP)
-	assert.Equal(t, 1, len(drawEvents))
+	affects, err := b.FightToTheEnd()
+	assert.NoError(t, err)
+	assert.Zero(t, len(affects))
+	assert.Equalf(t, battle.StatusLost, b.Status(), "battle status should be lost, but got %s", b.Status())
 }

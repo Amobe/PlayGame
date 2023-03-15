@@ -355,7 +355,7 @@ func getMockSkillWithTargetNumber(targetNumber int) vo.Skill {
 		Name: "attack",
 		AttributeMap: vo.NewAttributeMap(
 			[]vo.Attribute{
-				{vo.AttributeTypeTarget, decimal.NewFromInt(int64(targetNumber))},
+				vo.NewAttribute(vo.AttributeTypeTarget, decimal.NewFromInt(int64(targetNumber))),
 			}...,
 		),
 	}
@@ -439,16 +439,20 @@ func Test_MinionSlot_Act(t *testing.T) {
 			args: args{actorIdx: 1},
 			wantAffects: []Affect{
 				{
-					ActorIdx:   1,
-					TargetIdx:  7,
-					Skill:      "attack",
-					Attributes: []vo.Attribute{{vo.AttributeTypeDamage, decimal.NewFromInt(1)}},
+					ActorIdx:  1,
+					TargetIdx: 7,
+					Skill:     "attack",
+					Attributes: []vo.Attribute{
+						vo.NewAttribute(vo.AttributeTypeDamage, decimal.NewFromInt(1)),
+					},
 				},
 				{
-					ActorIdx:   1,
-					TargetIdx:  8,
-					Skill:      "attack",
-					Attributes: []vo.Attribute{{vo.AttributeTypeDamage, decimal.NewFromInt(1)}},
+					ActorIdx:  1,
+					TargetIdx: 8,
+					Skill:     "attack",
+					Attributes: []vo.Attribute{
+						vo.NewAttribute(vo.AttributeTypeDamage, decimal.NewFromInt(1)),
+					},
 				},
 			},
 		},
@@ -511,7 +515,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 				calculateAttackDamageFn: tt.fields.calculateAttackDamageFn,
 				targetPickerFn:          tt.fields.targetPickerFn,
 			}
-			assert.Equalf(t, tt.wantAffects, s.Act(tt.args.actorIdx), "Act(%v)", tt.args.actorIdx)
+			assert.Equalf(t, tt.wantAffects, s.act(tt.args.actorIdx), "act(%v)", tt.args.actorIdx)
 			assert.Equalf(t, tt.wantStatus, s.Status, "Status(%v)", tt.args.actorIdx)
 		})
 	}

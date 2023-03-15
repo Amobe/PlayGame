@@ -3,8 +3,6 @@ package battle
 import (
 	"fmt"
 
-	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
-	"github.com/Amobe/PlayGame/server/pkg/utils"
 	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
 
@@ -16,13 +14,7 @@ type Battle struct {
 	coreAggregator
 	battleID   string
 	status     Status
-	fighterMap map[string]Fighter
-	targetMap  map[string]string // bi-direction map between ally and enemy
-	allyMap    map[string]interface{}
-	enemyMap   map[string]interface{}
-	allySlot   Slot
-	enemySlot  Slot
-	order      []string
+	minionSlot *MinionSlot
 }
 
 func (b Battle) ID() string {
@@ -33,17 +25,12 @@ func (b Battle) Status() Status {
 	return b.status
 }
 
-func (b Battle) Fighter(id string) Fighter {
-	return b.fighterMap[id]
+func (b Battle) MinionSlot() *MinionSlot {
+	return b.minionSlot
 }
 
 func newBattle() Battle {
-	return Battle{
-		fighterMap: make(map[string]Fighter),
-		allyMap:    make(map[string]interface{}),
-		enemyMap:   make(map[string]interface{}),
-		targetMap:  make(map[string]string),
-	}
+	return Battle{}
 }
 
 func AggregatorLoader(events []domain.Event) (Battle, error) {
@@ -54,33 +41,10 @@ func AggregatorLoader(events []domain.Event) (Battle, error) {
 	return b, nil
 }
 
-func CreateBattle(id string, ally Fighter, enemy Fighter, enemySlot Slot) (Battle, error) {
-	fighterMap := map[string]Fighter{
-		ally.ID():  ally,
-		enemy.ID(): enemy,
-	}
-	targetMap := map[string]string{
-		ally.ID():  enemy.ID(),
-		enemy.ID(): ally.ID(),
-	}
-	allyMap := map[string]interface{}{
-		ally.ID(): struct{}{},
-	}
-	enemyMap := map[string]interface{}{
-		enemy.ID(): struct{}{},
-	}
-	fighters := []Fighter{
-		ally,
-		enemy,
-	}
+func CreateBattle(id string, minionSlot *MinionSlot) (Battle, error) {
 	createdEvent := EventBattleCreated{
 		BattleID:   id,
-		FighterMap: fighterMap,
-		TargetMap:  targetMap,
-		AllyMap:    allyMap,
-		EnemyMap:   enemyMap,
-		EnemySlot:  enemySlot,
-		Order:      getFighterOrder(fighters...),
+		MinionSlot: minionSlot,
 	}
 	b := newBattle()
 	if err := b.applyNew(createdEvent); err != nil {
@@ -89,117 +53,41 @@ func CreateBattle(id string, ally Fighter, enemy Fighter, enemySlot Slot) (Battl
 	return b, nil
 }
 
-func (b *Battle) SetAllySlot(slot Slot) error {
-	allySlotSetEvent := EventBattleAllySlotSet{
-		AllySlot: slot,
-	}
-	if err := b.applyNew(allySlotSetEvent); err != nil {
-		return fmt.Errorf("apply battle ally slot set event: %w", err)
-	}
-	return nil
-}
-
-func (b *Battle) FightToTheEnd() error {
+func (b *Battle) FightToTheEnd() ([]Affect, error) {
+	var battleAffects []Affect
 	const roundLimit = 50
 	// Fight until ally or enemy dead.
 	for i := 0; i < roundLimit; i++ {
-		if err := b.Fight(); err != nil {
-			return fmt.Errorf("fight: %w", err)
+		if b.status != StatusUnspecified {
+			break
 		}
-	}
-	if err := b.applyNew(EventBattleDraw{}); err != nil {
-		return fmt.Errorf("apply battle draw event: %w", err)
-	}
-	return nil
-}
-
-func (b *Battle) Fight() error {
-	for _, actorID := range b.order {
-		actor := b.fighterMap[actorID]
-		target, err := b.getTarget(actorID)
+		affects, err := b.fight()
 		if err != nil {
-			return fmt.Errorf("get target: %w", err)
+			return nil, fmt.Errorf("fight: %w", err)
 		}
-		slot, err := b.getSlot(actorID)
-		if err != nil {
-			return fmt.Errorf("get slot: %w", err)
-		}
-		var affects []Affect
-		for _, s := range slot.Skills {
-			if s.IsEmpty() {
-				continue
-			}
-			aa, ta := b.useSkill(s, actor, target)
-			if len(aa.Attributes) > 0 {
-				affects = append(affects, aa)
-			}
-			if len(ta.Attributes) > 0 {
-				affects = append(affects, ta)
-			}
-		}
-		if len(affects) > 0 {
-			if err := b.applyNew(EventBattleFought{Affects: affects}); err != nil {
-				return fmt.Errorf("apply battle fought event: %w", err)
-			}
-		}
-		if b.isAllDead(b.enemyMap) {
-			if err := b.applyNew(EventBattleWon{}); err != nil {
-				return fmt.Errorf("apply battle won event: %w", err)
-			}
-			return nil
-		}
-		if b.isAllDead(b.allyMap) {
-			if err := b.applyNew(EventBattleLost{}); err != nil {
-				return fmt.Errorf("apply battle lost event: %w", err)
-			}
-			return nil
+		battleAffects = append(battleAffects, affects...)
+	}
+	if b.status == StatusUnspecified {
+		if err := b.applyNew(EventBattleDraw{}); err != nil {
+			return nil, fmt.Errorf("apply battle draw event: %w", err)
 		}
 	}
-	return nil
+	return battleAffects, nil
 }
 
-func (b *Battle) getSlot(actorID string) (slot Slot, err error) {
-	if _, ok := b.allyMap[actorID]; ok {
-		slot = b.allySlot
-		return
-	}
-	if _, ok := b.enemyMap[actorID]; ok {
-		slot = b.enemySlot
-		return
-	}
-	err = fmt.Errorf("actor id is missing in ally and enemy map")
-	return
-}
-
-func (b *Battle) getTarget(actorID string) (target Fighter, err error) {
-	targetID, ok := b.targetMap[actorID]
-	if !ok {
-		err = fmt.Errorf("actor id is missing in target map")
-		return
-	}
-	target, ok = b.fighterMap[targetID]
-	if !ok {
-		err = fmt.Errorf("target id is missing in fighter map")
-		return
-	}
-	return
-}
-
-func (b *Battle) isAllDead(ids map[string]interface{}) bool {
-	for id := range ids {
-		if b.fighterMap[id].Alive() {
-			return false
+func (b *Battle) fight() ([]Affect, error) {
+	affects := b.minionSlot.PlayOneRound()
+	if b.minionSlot.Status == MinionSlotStatusAllyWon {
+		if err := b.applyNew(EventBattleWon{}); err != nil {
+			return nil, fmt.Errorf("apply battle won event: %w", err)
 		}
 	}
-	return true
-}
-
-func (b *Battle) useSkill(skill vo.Skill, actor, target Fighter) (actorAffect, targetAffect Affect) {
-	aa, ta := skill.Use(actor.AttributeMap(), target.AttributeMap())
-	skillName := skill.SkillType.String()
-	actorAffect = NewAffect(actor.ID(), target.ID(), actor.ID(), skillName, aa)
-	targetAffect = NewAffect(actor.ID(), target.ID(), target.ID(), skillName, ta)
-	return actorAffect, targetAffect
+	if b.minionSlot.Status == MinionSlotStatusEnemyWon {
+		if err := b.applyNew(EventBattleLost{}); err != nil {
+			return nil, fmt.Errorf("apply battle lost event: %w", err)
+		}
+	}
+	return affects, nil
 }
 
 func (b *Battle) applyNew(events ...domain.Event) error {
@@ -211,28 +99,8 @@ func (b *Battle) apply(new bool, events ...domain.Event) error {
 		switch ev := event.(type) {
 		case EventBattleCreated:
 			b.battleID = ev.BattleID
-			for id, c := range ev.FighterMap {
-				b.fighterMap[id] = c
-			}
-			b.fighterMap = map[string]Fighter{}
-			utils.CopyMap(b.fighterMap, ev.FighterMap)
-			b.targetMap = map[string]string{}
-			utils.CopyMap(b.targetMap, ev.TargetMap)
-			b.allyMap = make(map[string]interface{})
-			utils.CopyMap(b.allyMap, ev.AllyMap)
-			b.enemyMap = make(map[string]interface{})
-			utils.CopyMap(b.enemyMap, ev.EnemyMap)
-			b.enemySlot = ev.EnemySlot
-			order := make([]string, len(ev.Order))
-			copy(order, ev.Order)
-			b.order = order
 			b.status = StatusUnspecified
-		case EventBattleAllySlotSet:
-			b.allySlot = ev.AllySlot
-		case EventBattleFought:
-			for _, a := range ev.Affects {
-				b.fighterMap[a.ChangerID] = b.fighterMap[a.ChangerID].Affect(a.Attributes)
-			}
+			b.minionSlot = ev.MinionSlot
 		case EventBattleWon:
 			b.status = StatusWon
 		case EventBattleLost:

@@ -24,8 +24,8 @@ message FightResponse {
 }
 
 message FightAffect {
-  string actor_id = 1;
-  string target_id = 2;
+  int32 actor_idx = 1;
+  int32 target_idx = 2;
   string skill = 3;
   repeated Attribute attributes = 4;
 }

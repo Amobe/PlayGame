@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
 type BattleFightIn struct {
@@ -32,7 +31,7 @@ func (u *BattleFightUsecase) Execute(in BattleFightIn) (out BattleFightOut, err 
 		return
 	}
 
-	err = b.FightToTheEnd()
+	affects, err := b.FightToTheEnd()
 	if err != nil {
 		err = fmt.Errorf("battle fight: %w", err)
 		return
@@ -43,12 +42,6 @@ func (u *BattleFightUsecase) Execute(in BattleFightIn) (out BattleFightOut, err 
 		err = fmt.Errorf("battle repository save: %w", err)
 	}
 
-	events := b.Events()
-	for _, ev := range events {
-		fmt.Println(utils.ToString(ev))
-		if foughtEv, ok := ev.(battle.EventBattleFought); ok {
-			out.Affects = foughtEv.Affects
-		}
-	}
+	out.Affects = affects
 	return
 }

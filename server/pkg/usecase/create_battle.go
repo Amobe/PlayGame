@@ -3,17 +3,13 @@ package usecase
 import (
 	"fmt"
 
-	"github.com/shopspring/decimal"
-
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
-	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
 type CreateBattleInput struct {
-	CharacterID string
-	StageID     string
+	StageID string
 }
 
 type CreateBattleOutput struct {
@@ -35,10 +31,6 @@ func NewCreateBattleUsecase(
 }
 
 func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOutput, err error) {
-	c := vo.NewCharacter(in.CharacterID, []vo.Attribute{
-		vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(500)),
-		vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
-	}...)
 	s, err := u.stageRepo.Get(in.StageID)
 	if err != nil {
 		err = fmt.Errorf("stage repository get: %w", err)
@@ -46,7 +38,8 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 	}
 
 	battleID := utils.NewUUID()
-	b, err := battle.CreateBattle(battleID, c, s.Fighter, s.Slot)
+	minionSlot := battle.NewMinionSlot(fakeAllyMinions(), s.Minions)
+	b, err := battle.CreateBattle(battleID, minionSlot)
 	if err != nil {
 		err = fmt.Errorf("create battle: %w", err)
 		return
@@ -61,4 +54,8 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 		Battle: b,
 	}
 	return
+}
+
+func fakeAllyMinions() battle.Minions {
+	return battle.Minions{}
 }
