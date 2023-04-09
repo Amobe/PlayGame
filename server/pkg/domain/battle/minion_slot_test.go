@@ -26,15 +26,15 @@ func getMockUnitTakeAffect(groundIdx GroundIdx) *mockUnit {
 	return u
 }
 
-func getMockMinions() (ally Minions, enemy Minions) {
-	return Minions{
+func getMockMinions() (ally *Minions, enemy *Minions) {
+	return &Minions{
 			getMockUnitTakeAffect(1),
 			getMockUnitTakeAffect(2),
 			getMockUnitTakeAffect(3),
 			getMockUnitTakeAffect(4),
 			getMockUnitTakeAffect(5),
 			getMockUnitTakeAffect(6),
-		}, Minions{
+		}, &Minions{
 			getMockUnitTakeAffect(7),
 			getMockUnitTakeAffect(8),
 			getMockUnitTakeAffect(9),
@@ -153,7 +153,10 @@ func Test_MinionSlot_attack(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			allyMinions, enemyMinions := getMockMinions()
 			s := &MinionSlot{
+				AllyMinions:             allyMinions,
+				EnemyMinions:            enemyMinions,
 				calculateAttackDamageFn: tt.fields.calculateAttackDamageFn,
 			}
 			assert.Equalf(t, tt.want, s.attack(tt.args.attacker, tt.args.target), "attack(%v, %v)", tt.args.attacker, tt.args.target)
@@ -239,7 +242,7 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &MinionSlot{
-				AllyMinions: Minions{
+				AllyMinions: &Minions{
 					getMockUnitGetSkill(1, tt.fields.isDead),
 					getMockUnitGetSkill(2, tt.fields.isDead),
 					getMockUnitGetSkill(3, tt.fields.isDead),
@@ -247,7 +250,7 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 					getMockUnitGetSkill(5, tt.fields.isDead),
 					getMockUnitGetSkill(6, tt.fields.isDead),
 				},
-				EnemyMinions: Minions{
+				EnemyMinions: &Minions{
 					getMockUnitGetSkill(7, tt.fields.isDead),
 					getMockUnitGetSkill(8, tt.fields.isDead),
 					getMockUnitGetSkill(9, tt.fields.isDead),
@@ -275,8 +278,8 @@ func getMockUnitGetAgi(groundIdx GroundIdx, agi int) *mockUnit {
 
 func Test_MinionSlot_getActionOrder(t *testing.T) {
 	type fields struct {
-		AllyMinions  Minions
-		EnemyMinions Minions
+		AllyMinions  *Minions
+		EnemyMinions *Minions
 	}
 	tests := []struct {
 		name   string
@@ -286,7 +289,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 		{
 			name: "enemy summoner is faster than ally summoner",
 			fields: fields{
-				AllyMinions: Minions{
+				AllyMinions: &Minions{
 					getMockUnitGetAgi(1, 0),
 					getMockUnitGetAgi(2, 0),
 					getMockUnitGetAgi(3, 0),
@@ -295,7 +298,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 					// Only check summoner agi
 					getMockUnitGetAgi(6, 50),
 				},
-				EnemyMinions: Minions{
+				EnemyMinions: &Minions{
 					getMockUnitGetAgi(7, 0),
 					getMockUnitGetAgi(8, 0),
 					getMockUnitGetAgi(9, 0),
@@ -310,7 +313,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 		{
 			name: "ally summoner is faster than enemy summoner",
 			fields: fields{
-				AllyMinions: Minions{
+				AllyMinions: &Minions{
 					getMockUnitGetAgi(1, 0),
 					getMockUnitGetAgi(2, 0),
 					getMockUnitGetAgi(3, 0),
@@ -319,7 +322,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 					// Only check summoner agi
 					getMockUnitGetAgi(6, 100),
 				},
-				EnemyMinions: Minions{
+				EnemyMinions: &Minions{
 					getMockUnitGetAgi(7, 0),
 					getMockUnitGetAgi(8, 0),
 					getMockUnitGetAgi(9, 0),
@@ -386,8 +389,8 @@ func getMockDeadUnit(groundIdx GroundIdx, isDead bool) *mockUnit {
 
 func Test_MinionSlot_Act(t *testing.T) {
 	type fields struct {
-		AllyMinions             Minions
-		EnemyMinions            Minions
+		AllyMinions             *Minions
+		EnemyMinions            *Minions
 		calculateAttackDamageFn calculateAttackDamageFn
 		targetPickerFn          targetPickerFn
 	}
@@ -404,11 +407,11 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "produce no affect when actor is dead",
 			fields: fields{
-				AllyMinions: Minions{
+				AllyMinions: &Minions{
 					getMockDeadActorUnit(1),
 				},
 				// when actor is dead, the target picker will return nil.
-				EnemyMinions:   Minions{},
+				EnemyMinions:   &Minions{},
 				targetPickerFn: defaultTargetPickerFn,
 			},
 			args:        args{actorIdx: 1},
@@ -417,7 +420,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "actor attacks two enemy units and produce affects",
 			fields: fields{
-				AllyMinions: Minions{
+				AllyMinions: &Minions{
 					getMockAliveActorUnit(1, getMockSkillWithTargetNumber(2)),
 					nil,
 					nil,
@@ -425,7 +428,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 					nil,
 					getMockDeadUnit(6, false),
 				},
-				EnemyMinions: Minions{
+				EnemyMinions: &Minions{
 					getMockTargetUnit(7),
 					getMockTargetUnit(8),
 					nil,
@@ -459,7 +462,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "ally won when enemy summoner is dead",
 			fields: fields{
-				AllyMinions: Minions{
+				AllyMinions: &Minions{
 					getMockAliveActorUnit(1, getMockSkillWithTargetNumber(0)),
 					nil,
 					nil,
@@ -467,7 +470,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 					nil,
 					getMockDeadUnit(6, false),
 				},
-				EnemyMinions: Minions{
+				EnemyMinions: &Minions{
 					getMockTargetUnit(7),
 					getMockTargetUnit(8),
 					nil,
@@ -484,7 +487,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "enemy won when ally summoner is dead",
 			fields: fields{
-				AllyMinions: Minions{
+				AllyMinions: &Minions{
 					getMockAliveActorUnit(1, getMockSkillWithTargetNumber(0)),
 					nil,
 					nil,
@@ -492,7 +495,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 					nil,
 					getMockDeadUnit(6, true),
 				},
-				EnemyMinions: Minions{
+				EnemyMinions: &Minions{
 					getMockTargetUnit(7),
 					getMockTargetUnit(8),
 					nil,

@@ -51,10 +51,10 @@ func TestCharacter_Affect_DeadCondition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := vo.NewCharacter("", vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)))
-			got := c.Affect([]vo.Attribute{tt.args.attr}).AttributeMap()
+			got := c.TakeAffect([]vo.Attribute{tt.args.attr}).GetAttributeMap()
 			for _, want := range tt.wants {
 				actual := got.Get(want.Type).Value
-				assert.Truef(t, want.Value.Equal(actual), "Affect(%v), %s != %s",
+				assert.Truef(t, want.Value.Equal(actual), "TakeAffect(%v), %s != %s",
 					tt.args.attr, want.Value.String(), actual.String())
 			}
 		})

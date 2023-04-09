@@ -12,8 +12,8 @@ type StageRepository = InmemStorage[*stage.Stage]
 func NewInmemStageRepository() *StageRepository {
 	s := NewInmemStorage[*stage.Stage]()
 	fakeStage := &stage.Stage{
-		StageID: "fake",
-		Minions: battle.Minions{},
+		StageID:    "fake",
+		Characters: nil,
 	}
 	s.Create(fakeStage)
 	return s

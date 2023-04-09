@@ -38,7 +38,9 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 	}
 
 	battleID := utils.NewUUID()
-	minionSlot := battle.NewMinionSlot(fakeAllyMinions(), s.Minions)
+	allyMinions := battle.NewAllyMinions(nil)
+	enemyMinions := battle.NewEnemyMinions(s.Characters)
+	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
 	b, err := battle.CreateBattle(battleID, minionSlot)
 	if err != nil {
 		err = fmt.Errorf("create battle: %w", err)
@@ -54,8 +56,4 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 		Battle: b,
 	}
 	return
-}
-
-func fakeAllyMinions() battle.Minions {
-	return battle.Minions{}
 }

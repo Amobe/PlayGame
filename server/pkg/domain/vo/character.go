@@ -10,6 +10,7 @@ type Character struct {
 	CharacterID string
 	Basement    AttributeMap
 	Equipment   Equipment
+	Skill       Skill
 }
 
 func NewCharacter(id string, attrs ...Attribute) Character {
@@ -34,7 +35,7 @@ func (c Character) ID() string {
 	return c.CharacterID
 }
 
-func (c Character) AttributeMap() AttributeMap {
+func (c Character) GetAttributeMap() AttributeMap {
 	res := NewAttributeMap()
 	for _, attr := range c.Basement {
 		res.Insert(attr)
@@ -46,20 +47,24 @@ func (c Character) AttributeMap() AttributeMap {
 }
 
 func (c Character) GetAgi() int {
-	return int(c.AttributeMap().Get(AttributeTypeAGI).Value.InexactFloat64())
+	return int(c.GetAttributeMap().Get(AttributeTypeAGI).Value.InexactFloat64())
 }
 
-func (c Character) Alive() bool {
-	attrMap := c.AttributeMap()
+func (c Character) GetSkill() Skill {
+	return c.Skill
+}
+
+func (c Character) IsDead() bool {
+	attrMap := c.GetAttributeMap()
 	_, ok := attrMap[AttributeTypeDead]
-	return !ok
+	return ok
 }
 
-func (c Character) Affect(attr []Attribute) Character {
+func (c Character) TakeAffect(attr []Attribute) Character {
 	c.Basement = c.Basement.Insert(attr...)
 
 	// dead
-	am := c.AttributeMap()
+	am := c.GetAttributeMap()
 	if am.Get(AttributeTypeHP).Value.LessThanOrEqual(decimal.Zero) {
 		c.Basement = c.Basement.Insert(NewAttribute(AttributeTypeDead, decimal.NewFromInt(1)))
 	}

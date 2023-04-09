@@ -7,16 +7,6 @@ import (
 	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 )
 
-//go:generate mockery --name Unit --inpackage
-type Unit interface {
-	GetGroundIdx() GroundIdx
-	GetAttributeMap() vo.AttributeMap
-	GetAgi() int
-	IsDead() bool
-	TakeAffect(affects []vo.Attribute) Unit
-	GetSkill() vo.Skill
-}
-
 // GroundIdx is the index on the battleground.
 // The battleground contains the ally and enemy minions.
 // The GroundIdx for ally minions is between 1 and 5.
@@ -64,24 +54,6 @@ func (c CampIdx) IsSummoner() bool {
 	return c == SummonerCampIdx
 }
 
-type Minions [6]Unit
-
-func (m *Minions) Get(idx CampIdx) Unit {
-	return m[idx-1]
-}
-
-func (m *Minions) Set(idx CampIdx, unit Unit) {
-	m[idx-1] = unit
-}
-
-func (m *Minions) GetSummoner() Unit {
-	return m.Get(SummonerCampIdx)
-}
-
-func (m *Minions) SetSummoner(summoner Unit) {
-	m.Set(SummonerCampIdx, summoner)
-}
-
 type MinionSlotStatus string
 
 const (
@@ -95,8 +67,8 @@ type calculateAttackDamageFn func(attacker, target Unit, skill vo.Skill) (damage
 type targetPickerFn func(min, max, number int) []int
 
 type MinionSlot struct {
-	AllyMinions  Minions
-	EnemyMinions Minions
+	AllyMinions  *Minions
+	EnemyMinions *Minions
 	Status       MinionSlotStatus
 
 	calculateAttackDamageFn
@@ -108,7 +80,7 @@ var (
 	defaultTargetPickerFn          = targetPickerFromFirst
 )
 
-func NewMinionSlot(allyMinions, enemyMinions Minions) *MinionSlot {
+func NewMinionSlot(allyMinions, enemyMinions *Minions) *MinionSlot {
 	return &MinionSlot{
 		AllyMinions:  allyMinions,
 		EnemyMinions: enemyMinions,
@@ -182,7 +154,7 @@ func (s *MinionSlot) getAttackerAndTargets(idx GroundIdx) (attacker Unit, target
 	return attacker, targets
 }
 
-func (s *MinionSlot) getTargetsFn(minions Minions) func(number int) (targets []Unit) {
+func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []Unit) {
 	return func(number int) (targets []Unit) {
 		targets = make([]Unit, 0, number)
 		randIdx := s.targetPickerFn(1, 5, number)
