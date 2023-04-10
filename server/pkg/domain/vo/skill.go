@@ -9,14 +9,11 @@ var (
 	SkillSlash = NewSkill("slash", "slash", NewAttribute(AttributeTypeTarget, decimal.NewFromInt(1)))
 )
 
-type SkillUseFn func(actorAttr, targetAttr AttributeMap) (actorAffect, targetAffect []Attribute)
-
 type Skill struct {
 	SkillID      string
 	SkillType    SkillType
 	Name         string
 	AttributeMap AttributeMap
-	UseFn        SkillUseFn `json:"-"`
 }
 
 func NewSkill(skillID string, name string, attrs ...Attribute) Skill {
@@ -28,23 +25,8 @@ func NewSkill(skillID string, name string, attrs ...Attribute) Skill {
 	}
 }
 
-func NewCustomSkill(useFn SkillUseFn) Skill {
-	return Skill{
-		Name:      "custom_skill",
-		SkillType: SkillTypeNormal,
-		UseFn:     useFn,
-	}
-}
-
 func (s Skill) ID() string {
 	return s.SkillID
-}
-
-func (s Skill) Use(actorAttr, targetAttr AttributeMap) (actorAffect, targetAffect []Attribute) {
-	if s.UseFn == nil {
-		return nil, nil
-	}
-	return s.UseFn(actorAttr, targetAttr)
 }
 
 func (s Skill) IsEmpty() bool {
