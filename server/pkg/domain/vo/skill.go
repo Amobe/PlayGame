@@ -1,8 +1,13 @@
 package vo
 
-var SkillEmpty = Skill{
-	SkillType: SkillTypeEmpty,
-}
+import "github.com/shopspring/decimal"
+
+var (
+	SkillEmpty = Skill{
+		SkillType: SkillTypeEmpty,
+	}
+	SkillSlash = NewSkill("slash", "slash", NewAttribute(AttributeTypeTarget, decimal.NewFromInt(1)))
+)
 
 type SkillUseFn func(actorAttr, targetAttr AttributeMap) (actorAffect, targetAffect []Attribute)
 
@@ -11,7 +16,7 @@ type Skill struct {
 	SkillType    SkillType
 	Name         string
 	AttributeMap AttributeMap
-	UseFn        SkillUseFn
+	UseFn        SkillUseFn `json:"-"`
 }
 
 func NewSkill(skillID string, name string, attrs ...Attribute) Skill {

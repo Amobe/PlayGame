@@ -160,7 +160,7 @@ func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []
 		randIdx := s.targetPickerFn(1, 5, number)
 		for _, idx := range randIdx {
 			target := minions.Get(CampIdx(idx))
-			if target.IsDead() {
+			if target == nil || target.IsDead() {
 				target = minions.GetSummoner()
 			}
 			targets = append(targets, target)

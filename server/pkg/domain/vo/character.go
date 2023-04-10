@@ -14,9 +14,14 @@ type Character struct {
 }
 
 func NewCharacter(id string, attrs ...Attribute) Character {
+	return NewCharacterWithSkill(id, SkillEmpty, attrs...)
+}
+
+func NewCharacterWithSkill(id string, skill Skill, attrs ...Attribute) Character {
 	c := Character{
 		CharacterID: id,
 		Basement:    NewAttributeMap(),
+		Skill:       skill,
 	}
 	c.Basement.Insert(attrs...)
 	return c

@@ -80,7 +80,7 @@ func CalculateDamage(daa damageAttackerAttribute, dta damageTargetAttribute) (da
 	damageFactor := daa.di.Sub(dta.dR)
 
 	// baseFactor * skillFactor * criticalFactor * randomFactor + damageFactor
-	return baseFactor.Mul(skillFactor).Mul(criticalFactor).Mul(randomFactor).Add(damageFactor).Round(0), false
+	return baseFactor.Mul(skillFactor).Mul(criticalFactor).Mul(randomFactor).Add(damageFactor).Round(0), true
 }
 
 func baseDamageFactor(daa damageAttackerAttribute, dta damageTargetAttribute) decimal.Decimal {

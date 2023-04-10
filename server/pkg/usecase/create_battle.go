@@ -3,8 +3,11 @@ package usecase
 import (
 	"fmt"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils"
 )
 
@@ -38,7 +41,17 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 	}
 
 	battleID := utils.NewUUID()
-	allyMinions := battle.NewAllyMinions(nil)
+	allyMinions := battle.NewAllyMinions([]vo.Character{
+		vo.NewCharacterWithSkill("a1", vo.SkillSlash,
+			vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
+			vo.NewAttribute(vo.AttributeTypeHit, decimal.NewFromInt(100)),
+		),
+		vo.NewCharacter("a2"),
+		vo.NewCharacter("a3"),
+		vo.NewCharacter("a4"),
+		vo.NewCharacter("a5"),
+		vo.NewCharacter("a6"),
+	})
 	enemyMinions := battle.NewEnemyMinions(s.Characters)
 	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
 	b, err := battle.CreateBattle(battleID, minionSlot)

@@ -54,6 +54,10 @@ func CreateBattle(id string, minionSlot *MinionSlot) (Battle, error) {
 }
 
 func (b *Battle) FightToTheEnd() ([]Affect, error) {
+	if b.status != StatusUnspecified {
+		return nil, fmt.Errorf("battle is finished")
+	}
+
 	var battleAffects []Affect
 	const roundLimit = 50
 	// Fight until ally or enemy dead.
