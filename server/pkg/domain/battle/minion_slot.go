@@ -7,53 +7,6 @@ import (
 	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 )
 
-// GroundIdx is the index on the battleground.
-// The battleground contains the ally and enemy minions.
-// The GroundIdx for ally minions is between 1 and 5.
-// The GroundIdx for ally summoner is 6.
-// The GroundIdx for enemy minions is between 7 and 11.
-// The GroundIdx for enemy summoner is 12.
-type GroundIdx int
-
-var (
-	AllySummonerGroundIdx  = GroundIdx(6)
-	EnemySummonerGroundIdx = GroundIdx(12)
-)
-
-func (g GroundIdx) ToCampIdx() CampIdx {
-	if g > AllySummonerGroundIdx {
-		return CampIdx(g - 6)
-	}
-	return CampIdx(g)
-}
-
-func (g GroundIdx) IsEnemy() bool {
-	return g > 6
-}
-
-func (g GroundIdx) GetOppositeIdx() GroundIdx {
-	if g.IsEnemy() {
-		return g - 6
-	}
-	return g + 6
-}
-
-func (g GroundIdx) ToInt32() int32 {
-	return int32(g)
-}
-
-// CampIdx is the index of the camp slots.
-// The camp slots only contain the minions with same camp.
-// The CampIdx of the minions is between 1 and 5.
-// The CampIdx of the summoner is 6.
-type CampIdx int
-
-var SummonerCampIdx = CampIdx(6)
-
-func (c CampIdx) IsSummoner() bool {
-	return c == SummonerCampIdx
-}
-
 type MinionSlotStatus string
 
 const (
@@ -91,8 +44,8 @@ func NewMinionSlot(allyMinions, enemyMinions *Minions) *MinionSlot {
 	}
 }
 
-func (s *MinionSlot) PlayOneRound() []Affect {
-	var affects []Affect
+func (s *MinionSlot) PlayOneRound() []vo.Affect {
+	var affects []vo.Affect
 	actionOrder := s.getActionOrder()
 	for _, actorIdx := range actionOrder {
 		affects = append(affects, s.act(actorIdx)...)
@@ -103,12 +56,12 @@ func (s *MinionSlot) PlayOneRound() []Affect {
 	return affects
 }
 
-func (s *MinionSlot) act(actorIdx GroundIdx) []Affect {
+func (s *MinionSlot) act(actorIdx vo.GroundIdx) []vo.Affect {
 	attacker, targets := s.getAttackerAndTargets(actorIdx)
 	if attacker.IsDead() {
 		return nil
 	}
-	var affects []Affect
+	var affects []vo.Affect
 	for _, target := range targets {
 		affect := s.attack(attacker, target)
 		affects = append(affects, affect)
@@ -122,22 +75,22 @@ func (s *MinionSlot) act(actorIdx GroundIdx) []Affect {
 	return affects
 }
 
-func (s *MinionSlot) getActionOrder() []GroundIdx {
+func (s *MinionSlot) getActionOrder() []vo.GroundIdx {
 	// assume ally summoner is faster than enemy summoner, action idx is starting from 1 to 5
 	startActionIdx := 1
 	if s.enemySummoner().GetAgi() > s.allySummoner().GetAgi() {
 		// if enemy summoner is faster than ally summoner, action idx is starting from 7 to 11
 		startActionIdx = 7
 	}
-	actionOrder := make([]GroundIdx, 0, 10)
+	actionOrder := make([]vo.GroundIdx, 0, 10)
 	for i := startActionIdx; i < startActionIdx+5; i++ {
-		firstActorIdx := GroundIdx(i)
+		firstActorIdx := vo.GroundIdx(i)
 		actionOrder = append(actionOrder, firstActorIdx, firstActorIdx.GetOppositeIdx())
 	}
 	return actionOrder
 }
 
-func (s *MinionSlot) getAttackerAndTargets(idx GroundIdx) (attacker Unit, targets []Unit) {
+func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker Unit, targets []Unit) {
 	getAttackerFn := s.AllyMinions.Get
 	getTargetFn := s.getTargetsFn(s.EnemyMinions)
 	if idx.IsEnemy() {
@@ -159,7 +112,7 @@ func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []
 		targets = make([]Unit, 0, number)
 		randIdx := s.targetPickerFn(1, 5, number)
 		for _, idx := range randIdx {
-			target := minions.Get(CampIdx(idx))
+			target := minions.Get(vo.CampIdx(idx))
 			if target == nil || target.IsDead() {
 				target = minions.GetSummoner()
 			}
@@ -177,11 +130,11 @@ func targetPickerFromFirst(min, max, number int) []int {
 	return res
 }
 
-func (s *MinionSlot) attack(attacker Unit, target Unit) Affect {
+func (s *MinionSlot) attack(attacker Unit, target Unit) vo.Affect {
 	skill := attacker.GetSkill()
 	damage, isHit := s.calculateAttackDamageFn(attacker, target, skill)
 	if !isHit {
-		return NewMissAffect(attacker.GetGroundIdx(), target.GetGroundIdx())
+		return vo.NewMissAffect(attacker.GetGroundIdx(), target.GetGroundIdx())
 	}
 	affects := []vo.Attribute{
 		{
@@ -190,7 +143,7 @@ func (s *MinionSlot) attack(attacker Unit, target Unit) Affect {
 		},
 	}
 	s.unitTakeAffect(target, affects)
-	return NewAffect(attacker.GetGroundIdx(), target.GetGroundIdx(), skill.Name, affects)
+	return vo.NewAffect(attacker.GetGroundIdx(), target.GetGroundIdx(), skill.Name, affects)
 }
 
 func calculateAttackDamage(attacker, target Unit, skill vo.Skill) (damage decimal.Decimal, isHit bool) {
@@ -202,7 +155,7 @@ func calculateAttackDamage(attacker, target Unit, skill vo.Skill) (damage decima
 	return calculator.CalculateDamage(da, dt)
 }
 
-func (s *MinionSlot) getUnit(groundIdx GroundIdx) Unit {
+func (s *MinionSlot) getUnit(groundIdx vo.GroundIdx) Unit {
 	campIdx := groundIdx.ToCampIdx()
 	if groundIdx.IsEnemy() {
 		return s.EnemyMinions.Get(campIdx)

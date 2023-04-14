@@ -1,17 +1,13 @@
-package battle
-
-import (
-	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
-)
+package vo
 
 type Affect struct {
 	ActorIdx   GroundIdx
 	TargetIdx  GroundIdx
 	Skill      string
-	Attributes []vo.Attribute
+	Attributes []Attribute
 }
 
-func NewAffect(actorIdx, targetIdx GroundIdx, skillType string, attrs []vo.Attribute) Affect {
+func NewAffect(actorIdx, targetIdx GroundIdx, skillType string, attrs []Attribute) Affect {
 	return Affect{
 		ActorIdx:   actorIdx,
 		TargetIdx:  targetIdx,

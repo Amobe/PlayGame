@@ -19,7 +19,7 @@ func newMockUnit() *mockUnit {
 	return &mockUnit{MockUnit: &MockUnit{}}
 }
 
-func getMockUnitTakeAffect(groundIdx GroundIdx) *mockUnit {
+func getMockUnitTakeAffect(groundIdx vo.GroundIdx) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("TakeAffect", mock.Anything).Return(&mockUnit{MockUnit: &MockUnit{}, changed: true})
@@ -46,7 +46,7 @@ func getMockMinions() (ally *Minions, enemy *Minions) {
 
 func Test_MinionSlot_unitTakeAffect(t *testing.T) {
 	type args struct {
-		groundIdx GroundIdx
+		groundIdx vo.GroundIdx
 		unit      Unit
 	}
 	tests := []struct {
@@ -56,14 +56,14 @@ func Test_MinionSlot_unitTakeAffect(t *testing.T) {
 		{
 			name: "groundIdx is enemy, the enemy should be changed",
 			args: args{
-				groundIdx: GroundIdx(8),
+				groundIdx: vo.GroundIdx(8),
 				unit:      getMockUnitTakeAffect(8),
 			},
 		},
 		{
 			name: "groundIdx is ally, the ally should be changed",
 			args: args{
-				groundIdx: GroundIdx(4),
+				groundIdx: vo.GroundIdx(4),
 				unit:      getMockUnitTakeAffect(4),
 			},
 		},
@@ -83,7 +83,7 @@ func Test_MinionSlot_unitTakeAffect(t *testing.T) {
 	}
 }
 
-func getMockUnitTakeAttack(groundIdx GroundIdx) *mockUnit {
+func getMockUnitTakeAttack(groundIdx vo.GroundIdx) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("GetSkill").Return(vo.Skill{Name: "attack"})
@@ -115,7 +115,7 @@ func Test_MinionSlot_attack(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   Affect
+		want   vo.Affect
 	}{
 		{
 			name: "get miss affect",
@@ -126,7 +126,7 @@ func Test_MinionSlot_attack(t *testing.T) {
 				attacker: getMockUnitTakeAttack(1),
 				target:   getMockUnitTakeAttack(2),
 			},
-			want: Affect{
+			want: vo.Affect{
 				ActorIdx:  1,
 				TargetIdx: 2,
 				Skill:     "miss",
@@ -141,7 +141,7 @@ func Test_MinionSlot_attack(t *testing.T) {
 				attacker: getMockUnitTakeAttack(1),
 				target:   getMockUnitTakeAttack(2),
 			},
-			want: Affect{
+			want: vo.Affect{
 				ActorIdx:  1,
 				TargetIdx: 2,
 				Skill:     "attack",
@@ -164,7 +164,7 @@ func Test_MinionSlot_attack(t *testing.T) {
 	}
 }
 
-func getMockUnitGetSkill(groundIdx GroundIdx, isDead bool) *mockUnit {
+func getMockUnitGetSkill(groundIdx vo.GroundIdx, isDead bool) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("GetSkill").Return(vo.Skill{
@@ -185,14 +185,14 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 		isDead bool
 	}
 	type args struct {
-		idx GroundIdx
+		idx vo.GroundIdx
 	}
 	tests := []struct {
 		name                  string
 		fields                fields
 		args                  args
-		wantAttackerGroundIdx GroundIdx
-		wantTargetsGroundIdx  []GroundIdx
+		wantAttackerGroundIdx vo.GroundIdx
+		wantTargetsGroundIdx  []vo.GroundIdx
 	}{
 		{
 			name: "attacker is ally, targets are enemy and not dead",
@@ -200,10 +200,10 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 				isDead: false,
 			},
 			args: args{
-				idx: GroundIdx(2),
+				idx: vo.GroundIdx(2),
 			},
-			wantAttackerGroundIdx: GroundIdx(2),
-			wantTargetsGroundIdx:  []GroundIdx{7, 8},
+			wantAttackerGroundIdx: vo.GroundIdx(2),
+			wantTargetsGroundIdx:  []vo.GroundIdx{7, 8},
 		},
 		{
 			name: " attacker is ally, targets are enemy and dead, targets will be summoner",
@@ -211,10 +211,10 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 				isDead: true,
 			},
 			args: args{
-				idx: GroundIdx(2),
+				idx: vo.GroundIdx(2),
 			},
-			wantAttackerGroundIdx: GroundIdx(2),
-			wantTargetsGroundIdx:  []GroundIdx{12, 12},
+			wantAttackerGroundIdx: vo.GroundIdx(2),
+			wantTargetsGroundIdx:  []vo.GroundIdx{12, 12},
 		},
 		{
 			name: "attacker is enemy, targets are ally and not dead",
@@ -222,10 +222,10 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 				isDead: false,
 			},
 			args: args{
-				idx: GroundIdx(9),
+				idx: vo.GroundIdx(9),
 			},
-			wantAttackerGroundIdx: GroundIdx(9),
-			wantTargetsGroundIdx:  []GroundIdx{1, 2},
+			wantAttackerGroundIdx: vo.GroundIdx(9),
+			wantTargetsGroundIdx:  []vo.GroundIdx{1, 2},
 		},
 		{
 			name: "attacker is enemy, targets are ally and dead, targets will be summoner",
@@ -233,10 +233,10 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 				isDead: true,
 			},
 			args: args{
-				idx: GroundIdx(9),
+				idx: vo.GroundIdx(9),
 			},
-			wantAttackerGroundIdx: GroundIdx(9),
-			wantTargetsGroundIdx:  []GroundIdx{6, 6},
+			wantAttackerGroundIdx: vo.GroundIdx(9),
+			wantTargetsGroundIdx:  []vo.GroundIdx{6, 6},
 		},
 	}
 	for _, tt := range tests {
@@ -269,7 +269,7 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 	}
 }
 
-func getMockUnitGetAgi(groundIdx GroundIdx, agi int) *mockUnit {
+func getMockUnitGetAgi(groundIdx vo.GroundIdx, agi int) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("GetAgi").Return(agi)
@@ -284,7 +284,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   []GroundIdx
+		want   []vo.GroundIdx
 	}{
 		{
 			name: "enemy summoner is faster than ally summoner",
@@ -308,7 +308,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 					getMockUnitGetAgi(12, 100),
 				},
 			},
-			want: []GroundIdx{7, 1, 8, 2, 9, 3, 10, 4, 11, 5},
+			want: []vo.GroundIdx{7, 1, 8, 2, 9, 3, 10, 4, 11, 5},
 		},
 		{
 			name: "ally summoner is faster than enemy summoner",
@@ -332,7 +332,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 					getMockUnitGetAgi(12, 50),
 				},
 			},
-			want: []GroundIdx{1, 7, 2, 8, 3, 9, 4, 10, 5, 11},
+			want: []vo.GroundIdx{1, 7, 2, 8, 3, 9, 4, 10, 5, 11},
 		},
 	}
 	for _, tt := range tests {
@@ -346,7 +346,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 	}
 }
 
-func getMockDeadActorUnit(groundIdx GroundIdx) *mockUnit {
+func getMockDeadActorUnit(groundIdx vo.GroundIdx) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("IsDead").Return(true)
@@ -364,7 +364,7 @@ func getMockSkillWithTargetNumber(targetNumber int) vo.Skill {
 	}
 }
 
-func getMockAliveActorUnit(groundIdx GroundIdx, skill vo.Skill) *mockUnit {
+func getMockAliveActorUnit(groundIdx vo.GroundIdx, skill vo.Skill) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("IsDead").Return(false)
@@ -372,7 +372,7 @@ func getMockAliveActorUnit(groundIdx GroundIdx, skill vo.Skill) *mockUnit {
 	return u
 }
 
-func getMockTargetUnit(groundIdx GroundIdx) *mockUnit {
+func getMockTargetUnit(groundIdx vo.GroundIdx) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("IsDead").Return(false)
@@ -380,7 +380,7 @@ func getMockTargetUnit(groundIdx GroundIdx) *mockUnit {
 	return u
 }
 
-func getMockDeadUnit(groundIdx GroundIdx, isDead bool) *mockUnit {
+func getMockDeadUnit(groundIdx vo.GroundIdx, isDead bool) *mockUnit {
 	u := newMockUnit()
 	u.On("GetGroundIdx").Return(groundIdx)
 	u.On("IsDead").Return(isDead)
@@ -395,13 +395,13 @@ func Test_MinionSlot_Act(t *testing.T) {
 		targetPickerFn          targetPickerFn
 	}
 	type args struct {
-		actorIdx GroundIdx
+		actorIdx vo.GroundIdx
 	}
 	tests := []struct {
 		name        string
 		fields      fields
 		args        args
-		wantAffects []Affect
+		wantAffects []vo.Affect
 		wantStatus  MinionSlotStatus
 	}{
 		{
@@ -440,7 +440,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 				targetPickerFn:          defaultTargetPickerFn,
 			},
 			args: args{actorIdx: 1},
-			wantAffects: []Affect{
+			wantAffects: []vo.Affect{
 				{
 					ActorIdx:  1,
 					TargetIdx: 7,

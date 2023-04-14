@@ -22,23 +22,23 @@ func NewMinions(isAlly bool, characters []vo.Character) *Minions {
 	}
 	m := &Minions{}
 	for i, c := range characters {
-		m[i] = NewUnit(GroundIdx(startIdx+i), c)
+		m[i] = vo.NewGroundUnit(vo.GroundIdx(startIdx+i), c)
 	}
 	return m
 }
 
-func (m *Minions) Get(idx CampIdx) Unit {
+func (m *Minions) Get(idx vo.CampIdx) Unit {
 	return m[idx-1]
 }
 
-func (m *Minions) Set(idx CampIdx, unit Unit) {
+func (m *Minions) Set(idx vo.CampIdx, unit Unit) {
 	m[idx-1] = unit
 }
 
 func (m *Minions) GetSummoner() Unit {
-	return m.Get(SummonerCampIdx)
+	return m.Get(vo.SummonerCampIdx)
 }
 
 func (m *Minions) SetSummoner(summoner Unit) {
-	m.Set(SummonerCampIdx, summoner)
+	m.Set(vo.SummonerCampIdx, summoner)
 }

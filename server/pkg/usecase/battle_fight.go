@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 )
 
 type BattleFightIn struct {
@@ -11,7 +12,7 @@ type BattleFightIn struct {
 }
 
 type BattleFightOut struct {
-	Affects []battle.Affect
+	Affects []vo.Affect
 }
 
 type BattleFightUsecase struct {

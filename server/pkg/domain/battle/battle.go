@@ -3,6 +3,7 @@ package battle
 import (
 	"fmt"
 
+	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 	"github.com/Amobe/PlayGame/server/pkg/utils/domain"
 )
 
@@ -53,12 +54,12 @@ func CreateBattle(id string, minionSlot *MinionSlot) (Battle, error) {
 	return b, nil
 }
 
-func (b *Battle) FightToTheEnd() ([]Affect, error) {
+func (b *Battle) FightToTheEnd() ([]vo.Affect, error) {
 	if b.status != StatusUnspecified {
 		return nil, fmt.Errorf("battle is finished")
 	}
 
-	var battleAffects []Affect
+	var battleAffects []vo.Affect
 	const roundLimit = 50
 	// Fight until ally or enemy dead.
 	for i := 0; i < roundLimit; i++ {
@@ -79,7 +80,7 @@ func (b *Battle) FightToTheEnd() ([]Affect, error) {
 	return battleAffects, nil
 }
 
-func (b *Battle) fight() ([]Affect, error) {
+func (b *Battle) fight() ([]vo.Affect, error) {
 	affects := b.minionSlot.PlayOneRound()
 	if b.minionSlot.Status == MinionSlotStatusAllyWon {
 		if err := b.applyNew(EventBattleWon{}); err != nil {

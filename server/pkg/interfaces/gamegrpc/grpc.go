@@ -2,11 +2,10 @@ package gamegrpc
 
 import (
 	gamev1 "github.com/Amobe/PlayGame/server/gen/proto/go/game/v1"
-	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
 	"github.com/Amobe/PlayGame/server/pkg/domain/vo"
 )
 
-func BatchAffectToPB(al []battle.Affect) []*gamev1.FightAffect {
+func BatchAffectToPB(al []vo.Affect) []*gamev1.FightAffect {
 	res := make([]*gamev1.FightAffect, 0, len(al))
 	for _, a := range al {
 		res = append(res, AffectToPB(a))
@@ -14,7 +13,7 @@ func BatchAffectToPB(al []battle.Affect) []*gamev1.FightAffect {
 	return res
 }
 
-func AffectToPB(a battle.Affect) *gamev1.FightAffect {
+func AffectToPB(a vo.Affect) *gamev1.FightAffect {
 	return &gamev1.FightAffect{
 		ActorIdx:   a.ActorIdx.ToInt32(),
 		TargetIdx:  a.TargetIdx.ToInt32(),
