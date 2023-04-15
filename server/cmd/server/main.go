@@ -8,10 +8,10 @@ import (
 	"google.golang.org/grpc"
 
 	gamev1 "github.com/Amobe/PlayGame/server/gen/proto/go/game/v1"
-	"github.com/Amobe/PlayGame/server/pkg/domain/battle"
-	"github.com/Amobe/PlayGame/server/pkg/domain/stage"
-	"github.com/Amobe/PlayGame/server/pkg/infra/inmem"
-	"github.com/Amobe/PlayGame/server/pkg/interfaces/gamegrpc"
+	"github.com/Amobe/PlayGame/server/internal/domain/battle"
+	"github.com/Amobe/PlayGame/server/internal/domain/stage"
+	"github.com/Amobe/PlayGame/server/internal/infra/inmem"
+	"github.com/Amobe/PlayGame/server/internal/interfaces/gamegrpc"
 )
 
 func main() {
