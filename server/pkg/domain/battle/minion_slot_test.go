@@ -145,9 +145,9 @@ func Test_MinionSlot_attack(t *testing.T) {
 				ActorIdx:  1,
 				TargetIdx: 2,
 				Skill:     "attack",
-				Attributes: []vo.Attribute{
-					{Type: vo.AttributeTypeDamage, Value: decimal.NewFromInt(1)},
-				},
+				Attributes: vo.NewAttributeMap(
+					vo.NewAttribute(vo.AttributeTypeDamage, decimal.NewFromInt(1)),
+				),
 			},
 		},
 	}
@@ -445,17 +445,17 @@ func Test_MinionSlot_Act(t *testing.T) {
 					ActorIdx:  1,
 					TargetIdx: 7,
 					Skill:     "attack",
-					Attributes: []vo.Attribute{
+					Attributes: vo.NewAttributeMap(
 						vo.NewAttribute(vo.AttributeTypeDamage, decimal.NewFromInt(1)),
-					},
+					),
 				},
 				{
 					ActorIdx:  1,
 					TargetIdx: 8,
 					Skill:     "attack",
-					Attributes: []vo.Attribute{
+					Attributes: vo.NewAttributeMap(
 						vo.NewAttribute(vo.AttributeTypeDamage, decimal.NewFromInt(1)),
-					},
+					),
 				},
 			},
 		},

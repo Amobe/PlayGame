@@ -85,11 +85,11 @@ func (_m *MockUnit) IsDead() bool {
 }
 
 // TakeAffect provides a mock function with given fields: affects
-func (_m *MockUnit) TakeAffect(affects []vo.Attribute) vo.GroundUnit {
+func (_m *MockUnit) TakeAffect(affects vo.AttributeMap) vo.GroundUnit {
 	ret := _m.Called(affects)
 
 	var r0 vo.GroundUnit
-	if rf, ok := ret.Get(0).(func([]vo.Attribute) vo.GroundUnit); ok {
+	if rf, ok := ret.Get(0).(func(vo.AttributeMap) vo.GroundUnit); ok {
 		r0 = rf(affects)
 	} else {
 		r0 = ret.Get(0).(vo.GroundUnit)

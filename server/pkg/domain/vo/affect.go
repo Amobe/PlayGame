@@ -4,10 +4,10 @@ type Affect struct {
 	ActorIdx   GroundIdx
 	TargetIdx  GroundIdx
 	Skill      string
-	Attributes []Attribute
+	Attributes AttributeMap
 }
 
-func NewAffect(actorIdx, targetIdx GroundIdx, skillType string, attrs []Attribute) Affect {
+func NewAffect(actorIdx, targetIdx GroundIdx, skillType string, attrs AttributeMap) Affect {
 	return Affect{
 		ActorIdx:   actorIdx,
 		TargetIdx:  targetIdx,

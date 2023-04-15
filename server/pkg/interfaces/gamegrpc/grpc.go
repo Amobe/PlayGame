@@ -18,13 +18,13 @@ func AffectToPB(a vo.Affect) *gamev1.FightAffect {
 		ActorIdx:   a.ActorIdx.ToInt32(),
 		TargetIdx:  a.TargetIdx.ToInt32(),
 		Skill:      a.Skill,
-		Attributes: BatchAttributeToPB(a.Attributes),
+		Attributes: AttributeMapToPB(a.Attributes),
 	}
 }
 
-func BatchAttributeToPB(al []vo.Attribute) []*gamev1.Attribute {
-	res := make([]*gamev1.Attribute, 0, len(al))
-	for _, a := range al {
+func AttributeMapToPB(am vo.AttributeMap) []*gamev1.Attribute {
+	res := make([]*gamev1.Attribute, 0, len(am))
+	for _, a := range am {
 		res = append(res, AttributeToPB(a))
 	}
 	return res

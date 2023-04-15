@@ -17,7 +17,7 @@ type Weapon struct {
 	AttributeMap AttributeMap
 }
 
-func NewWeapon(id string, weaponTypeStr string, weaponName string, skillTypeStr string, attributes ...Attribute) (Weapon, error) {
+func NewWeapon(id string, weaponTypeStr string, weaponName string, skillTypeStr string, attributes AttributeMap) (Weapon, error) {
 	weaponType := ToWeaponType(weaponTypeStr)
 	if weaponType == WeaponTypeUnspecified {
 		return Weapon{}, fmt.Errorf("weapon type is unspecified: %s", weaponTypeStr)
@@ -27,7 +27,7 @@ func NewWeapon(id string, weaponTypeStr string, weaponName string, skillTypeStr 
 		WeaponID:     id,
 		WeaponType:   weaponType,
 		Name:         weaponName,
-		AttributeMap: NewAttributeMap(attributes...),
+		AttributeMap: attributes,
 	}, nil
 }
 

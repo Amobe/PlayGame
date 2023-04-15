@@ -136,12 +136,12 @@ func (s *MinionSlot) attack(attacker Unit, target Unit) vo.Affect {
 	if !isHit {
 		return vo.NewMissAffect(attacker.GetGroundIdx(), target.GetGroundIdx())
 	}
-	affects := []vo.Attribute{
-		{
+	affects := vo.NewAttributeMap(
+		vo.Attribute{
 			Type:  vo.AttributeTypeDamage,
 			Value: damage,
 		},
-	}
+	)
 	s.unitTakeAffect(target, affects)
 	return vo.NewAffect(attacker.GetGroundIdx(), target.GetGroundIdx(), skill.Name, affects)
 }
@@ -163,7 +163,7 @@ func (s *MinionSlot) getUnit(groundIdx vo.GroundIdx) Unit {
 	return s.AllyMinions.Get(campIdx)
 }
 
-func (s *MinionSlot) unitTakeAffect(unit Unit, affects []vo.Attribute) {
+func (s *MinionSlot) unitTakeAffect(unit Unit, affects vo.AttributeMap) {
 	groundIdx := unit.GetGroundIdx()
 	campIDx := groundIdx.ToCampIdx()
 	minionSetFn := s.AllyMinions.Set

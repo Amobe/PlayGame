@@ -13,17 +13,16 @@ type Character struct {
 	Skill       Skill
 }
 
-func NewCharacter(id string, attrs ...Attribute) Character {
-	return NewCharacterWithSkill(id, SkillEmpty, attrs...)
+func NewCharacter(id string, attrs AttributeMap) Character {
+	return NewCharacterWithSkill(id, SkillEmpty, attrs)
 }
 
-func NewCharacterWithSkill(id string, skill Skill, attrs ...Attribute) Character {
+func NewCharacterWithSkill(id string, skill Skill, attrs AttributeMap) Character {
 	c := Character{
 		CharacterID: id,
-		Basement:    NewAttributeMap(),
+		Basement:    attrs,
 		Skill:       skill,
 	}
-	c.Basement.Insert(attrs...)
 	return c
 }
 
@@ -31,8 +30,10 @@ func RandomCharacter(id string) Character {
 	hp := utils.GetRandIntInRange(100, 200)
 	atk := utils.GetRandIntInRange(20, 50)
 	return NewCharacter(id,
-		Attribute{Type: AttributeTypeHP, Value: decimal.NewFromInt(int64(hp))},
-		Attribute{Type: AttributeTypeATK, Value: decimal.NewFromInt(int64(atk))},
+		NewAttributeMap(
+			NewAttribute(AttributeTypeHP, decimal.NewFromInt(int64(hp))),
+			NewAttribute(AttributeTypeATK, decimal.NewFromInt(int64(atk))),
+		),
 	)
 }
 
@@ -65,8 +66,8 @@ func (c Character) IsDead() bool {
 	return ok
 }
 
-func (c Character) TakeAffect(attr []Attribute) Character {
-	c.Basement = c.Basement.Insert(attr...)
+func (c Character) TakeAffect(attrs AttributeMap) Character {
+	c.Basement = c.Basement.Merge(attrs)
 
 	// dead
 	am := c.GetAttributeMap()

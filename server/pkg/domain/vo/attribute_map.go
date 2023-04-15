@@ -16,6 +16,11 @@ func NewAttributeMap(attrs ...Attribute) AttributeMap {
 	return m
 }
 
+// Merge merges two AttributeMap
+func (a AttributeMap) Merge(b AttributeMap) AttributeMap {
+	return MergeAttributeMap(a, b)
+}
+
 func (a AttributeMap) Insert(attrs ...Attribute) AttributeMap {
 	for _, attr := range attrs {
 		a.insert(attr)

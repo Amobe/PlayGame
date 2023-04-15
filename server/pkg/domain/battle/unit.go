@@ -8,6 +8,6 @@ type Unit interface {
 	GetAttributeMap() vo.AttributeMap
 	GetAgi() int
 	IsDead() bool
-	TakeAffect(affects []vo.Attribute) vo.GroundUnit
+	TakeAffect(affects vo.AttributeMap) vo.GroundUnit
 	GetSkill() vo.Skill
 }

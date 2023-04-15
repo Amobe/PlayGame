@@ -11,7 +11,7 @@ import (
 
 func TestCharacter_Affect_DeadCondition(t *testing.T) {
 	type args struct {
-		attr vo.Attribute
+		attr vo.AttributeMap
 	}
 	tests := []struct {
 		name  string
@@ -21,7 +21,7 @@ func TestCharacter_Affect_DeadCondition(t *testing.T) {
 		{
 			name: "affect attributes should be added to the new character instance",
 			args: args{
-				attr: vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)),
+				attr: vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10))),
 			},
 			wants: []vo.Attribute{
 				vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(20)),
@@ -30,7 +30,7 @@ func TestCharacter_Affect_DeadCondition(t *testing.T) {
 		{
 			name: "dead should be added when character's HP equal to zero",
 			args: args{
-				attr: vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-10)),
+				attr: vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-10))),
 			},
 			wants: []vo.Attribute{
 				vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(0)),
@@ -40,7 +40,7 @@ func TestCharacter_Affect_DeadCondition(t *testing.T) {
 		{
 			name: "dead should be added when character's HP less than zero",
 			args: args{
-				attr: vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-20)),
+				attr: vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-20))),
 			},
 			wants: []vo.Attribute{
 				vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(-10)),
@@ -50,8 +50,9 @@ func TestCharacter_Affect_DeadCondition(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := vo.NewCharacter("", vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)))
-			got := c.TakeAffect([]vo.Attribute{tt.args.attr}).GetAttributeMap()
+			attributes := vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)))
+			c := vo.NewCharacter("", attributes)
+			got := c.TakeAffect(tt.args.attr).GetAttributeMap()
 			for _, want := range tt.wants {
 				actual := got.Get(want.Type).Value
 				assert.Truef(t, want.Value.Equal(actual), "TakeAffect(%v), %s != %s",

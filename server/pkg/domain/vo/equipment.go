@@ -39,16 +39,14 @@ func (e Equipment) EquipWeapon(w Weapon) Equipment {
 }
 
 func (e Equipment) GetAttributes() AttributeMap {
-	m := MergeAttributeMap(e.MajorHand.AttributeMap, e.MinorHand.AttributeMap)
-	m = m.Insert(e.Suite.Attributes...)
-	return m
+	return MergeAttributeMap(e.MajorHand.AttributeMap, e.MinorHand.AttributeMap, e.Suite.Attributes)
 }
 
 type Suite struct {
 	ID         string
 	Name       string
 	Pair       []string
-	Attributes []Attribute
+	Attributes AttributeMap
 }
 
 var EmptySuite = Suite{"2d462197-e311-4d29-8e2c-6df9a2f76582", "Empty", nil, nil}
@@ -57,17 +55,17 @@ var SuiteSet = map[string]Suite{
 	"Empty": EmptySuite,
 	"Physical": {"87d1454d-c5b9-48c3-9928-1a9e003ee9c6", "Physical",
 		[]string{"Knife", "Shield"},
-		[]Attribute{
+		NewAttributeMap(
 			NewAttribute(AttributeTypeATK, decimal.NewFromInt(10)),
 			NewAttribute(AttributeTypeDEF, decimal.NewFromInt(10)),
-		},
+		),
 	},
 	"Magical": {"09a2b7e8-2943-493b-bc48-3d413e969bca", "Magical",
 		[]string{"Book", "Ball"},
-		[]Attribute{
+		NewAttributeMap(
 			NewAttribute(AttributeTypeMATK, decimal.NewFromInt(10)),
 			NewAttribute(AttributeTypeMDEF, decimal.NewFromInt(10)),
-		},
+		),
 	},
 }
 

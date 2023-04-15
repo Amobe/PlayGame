@@ -6,7 +6,7 @@ var (
 	SkillEmpty = Skill{
 		SkillType: SkillTypeEmpty,
 	}
-	SkillSlash = NewSkill("slash", NewAttribute(AttributeTypeTarget, decimal.NewFromInt(1)))
+	SkillSlash = newSlashSkill()
 )
 
 type Skill struct {
@@ -15,11 +15,11 @@ type Skill struct {
 	AttributeMap AttributeMap
 }
 
-func NewSkill(name string, attrs ...Attribute) Skill {
+func NewSkill(name string, attrs AttributeMap) Skill {
 	return Skill{
 		Name:         name,
 		SkillType:    SkillTypeNormal,
-		AttributeMap: NewAttributeMap(attrs...),
+		AttributeMap: attrs,
 	}
 }
 
@@ -51,3 +51,13 @@ const (
 	SkillTypeNormal SkillType = "normal"
 	SkillTypeEmpty  SkillType = "empty"
 )
+
+func newSlashSkill() Skill {
+	return Skill{
+		SkillType: SkillTypeNormal,
+		Name:      "slash",
+		AttributeMap: NewAttributeMap(
+			NewAttribute(AttributeTypeTarget, decimal.NewFromInt(1)),
+		),
+	}
+}

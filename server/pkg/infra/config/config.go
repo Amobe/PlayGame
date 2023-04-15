@@ -63,17 +63,11 @@ func insertDataToRepository[T inmem.Indexer](r *inmem.InmemStorage[T], toDomain 
 }
 
 var (
-	skillRepository  *inmem.InmemStorage[vo.Skill]
 	weaponRepository *inmem.InmemStorage[vo.Weapon]
 )
 
 func init() {
-	skillRepository = initRepository(skillJsonPath, skillDataToDomain)
 	weaponRepository = initRepository(weaponJsonPath, weaponDataToDomain)
-}
-
-func GetSkillRepository() *inmem.InmemStorage[vo.Skill] {
-	return skillRepository
 }
 
 func GetWeaponRepository() *inmem.InmemStorage[vo.Weapon] {

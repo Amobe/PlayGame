@@ -16,9 +16,9 @@ func (u GroundUnit) GetGroundIdx() GroundIdx {
 	return u.groundIdx
 }
 
-func (u GroundUnit) TakeAffect(affects []Attribute) GroundUnit {
+func (u GroundUnit) TakeAffect(attributes AttributeMap) GroundUnit {
 	return GroundUnit{
 		groundIdx: u.groundIdx,
-		Character: u.Character.TakeAffect(affects),
+		Character: u.Character.TakeAffect(attributes),
 	}
 }
