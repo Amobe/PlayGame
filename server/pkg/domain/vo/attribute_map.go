@@ -52,3 +52,16 @@ func (a AttributeMap) Get(attributeType AttributeType) Attribute {
 	}
 	return attr
 }
+
+// EqualTo compares two AttributeMap
+func (a AttributeMap) EqualTo(b AttributeMap) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, v := range a {
+		if !v.EqualTo(b[k]) {
+			return false
+		}
+	}
+	return true
+}

@@ -34,3 +34,8 @@ func (g GroundIdx) GetOppositeIdx() GroundIdx {
 func (g GroundIdx) ToInt32() int32 {
 	return int32(g)
 }
+
+// EqualTo returns true if the GroundIdx is equal to the other GroundIdx.
+func (g GroundIdx) EqualTo(other GroundIdx) bool {
+	return g == other
+}

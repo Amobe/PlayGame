@@ -18,6 +18,17 @@ func (a Attribute) Add(value decimal.Decimal) Attribute {
 	return NewAttribute(a.Type, a.Value.Add(value))
 }
 
+// EqualTo compares two Attribute objects.
+func (a Attribute) EqualTo(other Attribute) bool {
+	if a.Type != other.Type {
+		return false
+	}
+	if a.Value.Equal(other.Value) {
+		return false
+	}
+	return true
+}
+
 type AttributeType string
 
 func (a AttributeType) String() string {

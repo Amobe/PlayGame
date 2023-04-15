@@ -23,3 +23,25 @@ func NewMissAffect(actorIdx, targetIdx GroundIdx) Affect {
 		Skill:     "miss",
 	}
 }
+
+// EqualTo compares two Affect objects.
+func (a Affect) EqualTo(other Affect) bool {
+	if a.ActorIdx.EqualTo(other.ActorIdx) {
+		return false
+	}
+	if a.TargetIdx.EqualTo(other.TargetIdx) {
+		return false
+	}
+	if a.Skill != other.Skill {
+		return false
+	}
+	if len(a.Attributes) != len(other.Attributes) {
+		return false
+	}
+	for i := range a.Attributes {
+		if a.Attributes[i] != other.Attributes[i] {
+			return false
+		}
+	}
+	return true
+}
