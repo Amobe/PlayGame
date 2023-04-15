@@ -8,7 +8,39 @@ services:
       - game_app_network
     ports:
       - "8080:8080"
+  db:
+    restart: always
+    image: postgres:15.2-alpine3.17
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: game_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - db-data:/va/lib/postgresql/data/pgdata
+    networks:
+      - game_app_network
+    ports:
+      - "5432:5432"
+  pgadmin:
+    restart: always
+    image: dpage/pgadmin4:6.21
+    environment:
+      PGADMIN_DEFAULT_EMAIL: amobe.momoko@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: 54995499
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - game_app_network
+    links:
+      - db:dbsql-server
 networks:
   game_app_network:
     name: game_app_network
     driver: bridge
+volumes:
+  db-data:
+  pgadmin-data:
