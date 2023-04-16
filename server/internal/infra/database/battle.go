@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -11,15 +12,14 @@ import (
 )
 
 type BattleGorm struct {
-	ID               uint   `gorm:"column:id;primaryKey;autoIncrement"`
-	BattleID         string `gorm:"column:battle_id;type:varchar(64);uniqueIndex"`
-	Status           string `gorm:"column:status;type:varchar(32)"`
-	AllyMinions      string `gorm:"column:ally_minions;type:varchar(512);serializer:json"`
-	EnemyMinions     string `gorm:"column:enemy_minions;type:varchar(512);serializer:json"`
-	MinionSlotStatus string `gorm:"column:minion_slot_status;type:varchar(32)"`
+	ID           uint      `gorm:"column:id;primaryKey;autoIncrement"`
+	BattleID     string    `gorm:"column:battle_id;type:varchar(64);uniqueIndex"`
+	AllyMinions  []byte    `gorm:"column:ally_minions;type:bytes;serializer:json"`
+	EnemyMinions []byte    `gorm:"column:enemy_minions;type:bytes;serializer:json"`
+	CreateAt     time.Time `gorm:"column:create_at;type:timestamp;DEFAULT:CURRENT_TIMESTAMP"`
 }
 
-func (BattleGorm) FromEntity(b battle.Battle) (BattleGorm, error) {
+func (BattleGorm) FromEntity(b *battle.Battle) (BattleGorm, error) {
 	allyMinionsJson, err := utils.MarshalToJSON(b.MinionSlot().AllyMinions)
 	if err != nil {
 		return BattleGorm{}, fmt.Errorf("marshal ally minions: %w", err)
@@ -30,27 +30,21 @@ func (BattleGorm) FromEntity(b battle.Battle) (BattleGorm, error) {
 	}
 
 	return BattleGorm{
-		BattleID:         b.ID(),
-		Status:           string(b.Status()),
-		AllyMinions:      allyMinionsJson,
-		EnemyMinions:     enemyMinionsJson,
-		MinionSlotStatus: string(b.MinionSlot().Status),
+		BattleID:     b.ID(),
+		AllyMinions:  allyMinionsJson,
+		EnemyMinions: enemyMinionsJson,
 	}, nil
 }
 
-func (b BattleGorm) ToEntity() (battle.Battle, error) {
+func (b BattleGorm) ToEntity() (*battle.Battle, error) {
 	var allyMinions, enemyMinions battle.Minions
 	if err := utils.UnmarshalFromJSON(b.AllyMinions, &allyMinions); err != nil {
-		return battle.Battle{}, fmt.Errorf("unmarshal ally minions: %w", err)
+		return nil, fmt.Errorf("unmarshal ally minions: %w", err)
 	}
 	if err := utils.UnmarshalFromJSON(b.EnemyMinions, &enemyMinions); err != nil {
-		return battle.Battle{}, fmt.Errorf("unmarshal enemy minions: %w", err)
+		return nil, fmt.Errorf("unmarshal enemy minions: %w", err)
 	}
-	return battle.CreateBattle(b.BattleID, &battle.MinionSlot{
-		AllyMinions:  &allyMinions,
-		EnemyMinions: &enemyMinions,
-		Status:       battle.MinionSlotStatus(b.MinionSlotStatus),
-	})
+	return battle.CreateBattle(b.BattleID, battle.NewMinionSlot(&allyMinions, &enemyMinions))
 }
 
 func (BattleGorm) TableName() string {
@@ -66,22 +60,23 @@ func NewBattleGormRepository(dsn string) (*BattleGormRepository, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect battle gorm: %w", err)
 	}
+	client.AutoMigrate(&BattleGorm{})
 	return &BattleGormRepository{
 		client: client,
 	}, nil
 }
 
 // Get gets battle by battle id
-func (r *BattleGormRepository) Get(battleID string) (battle.Battle, error) {
+func (r *BattleGormRepository) Get(battleID string) (*battle.Battle, error) {
 	var battleGorm BattleGorm
 	if err := r.client.Where("battle_id = ?", battleID).First(&battleGorm).Error; err != nil {
-		return battle.Battle{}, fmt.Errorf("find battle: %w", err)
+		return nil, fmt.Errorf("find battle: %w", err)
 	}
 	return battleGorm.ToEntity()
 }
 
 // Save saves battle
-func (r *BattleGormRepository) Save(b battle.Battle) error {
+func (r *BattleGormRepository) Save(b *battle.Battle) error {
 	battleGorm, err := BattleGorm{}.FromEntity(b)
 	if err != nil {
 		return fmt.Errorf("convert battle to gorm: %w", err)
