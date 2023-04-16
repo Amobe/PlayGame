@@ -14,7 +14,7 @@ type Character struct {
 }
 
 func NewCharacter(id string, attrs AttributeMap) Character {
-	return NewCharacterWithSkill(id, SkillEmpty, attrs)
+	return NewCharacterWithSkill(id, EmptySkill, attrs)
 }
 
 func NewCharacterWithSkill(id string, skill Skill, attrs AttributeMap) Character {

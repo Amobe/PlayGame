@@ -2,7 +2,7 @@ package battle
 
 import "github.com/Amobe/PlayGame/server/internal/domain/vo"
 
-type Minions [6]Unit
+type Minions [6]vo.GroundUnit
 
 func NewAllyMinions(characters []vo.Character) *Minions {
 	return NewMinions(true, characters)
@@ -27,18 +27,18 @@ func NewMinions(isAlly bool, characters []vo.Character) *Minions {
 	return m
 }
 
-func (m *Minions) Get(idx vo.CampIdx) Unit {
+func (m *Minions) Get(idx vo.CampIdx) vo.GroundUnit {
 	return m[idx-1]
 }
 
-func (m *Minions) Set(idx vo.CampIdx, unit Unit) {
+func (m *Minions) Set(idx vo.CampIdx, unit vo.GroundUnit) {
 	m[idx-1] = unit
 }
 
-func (m *Minions) GetSummoner() Unit {
+func (m *Minions) GetSummoner() vo.GroundUnit {
 	return m.Get(vo.SummonerCampIdx)
 }
 
-func (m *Minions) SetSummoner(summoner Unit) {
+func (m *Minions) SetSummoner(summoner vo.GroundUnit) {
 	m.Set(vo.SummonerCampIdx, summoner)
 }

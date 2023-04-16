@@ -1,5 +1,9 @@
 package vo
 
+import (
+	"strconv"
+)
+
 // GroundIdx is the index on the battleground.
 // The battleground contains the ally and enemy minions.
 // The GroundIdx for ally minions is between 1 and 5.
@@ -33,6 +37,11 @@ func (g GroundIdx) GetOppositeIdx() GroundIdx {
 
 func (g GroundIdx) ToInt32() int32 {
 	return int32(g)
+}
+
+// ToString returns the string representation of the GroundIdx.
+func (g GroundIdx) ToString() string {
+	return strconv.Itoa(int(g))
 }
 
 // EqualTo returns true if the GroundIdx is equal to the other GroundIdx.

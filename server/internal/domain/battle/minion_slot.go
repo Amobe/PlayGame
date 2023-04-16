@@ -15,7 +15,7 @@ const (
 	MinionSlotStatusEnemyWon MinionSlotStatus = "enemy_won"
 )
 
-type calculateAttackDamageFn func(attacker, target Unit, skill vo.Skill) (damage decimal.Decimal, hit bool)
+type calculateAttackDamageFn func(attacker, target vo.GroundUnit, skill vo.Skill) (damage decimal.Decimal, hit bool)
 
 type targetPickerFn func(min, max, number int) []int
 
@@ -90,7 +90,7 @@ func (s *MinionSlot) getActionOrder() []vo.GroundIdx {
 	return actionOrder
 }
 
-func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker Unit, targets []Unit) {
+func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker vo.GroundUnit, targets []vo.GroundUnit) {
 	getAttackerFn := s.AllyMinions.Get
 	getTargetFn := s.getTargetsFn(s.EnemyMinions)
 	if idx.IsEnemy() {
@@ -107,13 +107,13 @@ func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker Unit, tar
 	return attacker, targets
 }
 
-func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []Unit) {
-	return func(number int) (targets []Unit) {
-		targets = make([]Unit, 0, number)
+func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []vo.GroundUnit) {
+	return func(number int) (targets []vo.GroundUnit) {
+		targets = make([]vo.GroundUnit, 0, number)
 		randIdx := s.targetPickerFn(1, 5, number)
 		for _, idx := range randIdx {
 			target := minions.Get(vo.CampIdx(idx))
-			if target == nil || target.IsDead() {
+			if target.IsDead() {
 				target = minions.GetSummoner()
 			}
 			targets = append(targets, target)
@@ -130,7 +130,7 @@ func targetPickerFromFirst(min, max, number int) []int {
 	return res
 }
 
-func (s *MinionSlot) attack(attacker Unit, target Unit) vo.Affect {
+func (s *MinionSlot) attack(attacker, target vo.GroundUnit) vo.Affect {
 	skill := attacker.GetSkill()
 	damage, isHit := s.calculateAttackDamageFn(attacker, target, skill)
 	if !isHit {
@@ -146,7 +146,7 @@ func (s *MinionSlot) attack(attacker Unit, target Unit) vo.Affect {
 	return vo.NewAffect(attacker.GetGroundIdx(), target.GetGroundIdx(), skill.Name, affects)
 }
 
-func calculateAttackDamage(attacker, target Unit, skill vo.Skill) (damage decimal.Decimal, isHit bool) {
+func calculateAttackDamage(attacker, target vo.GroundUnit, skill vo.Skill) (damage decimal.Decimal, isHit bool) {
 	attackerAttribute := attacker.GetAttributeMap()
 	skillAttribute := skill.AttributeMap
 	targetAttribute := target.GetAttributeMap()
@@ -155,7 +155,7 @@ func calculateAttackDamage(attacker, target Unit, skill vo.Skill) (damage decima
 	return calculator.CalculateDamage(da, dt)
 }
 
-func (s *MinionSlot) getUnit(groundIdx vo.GroundIdx) Unit {
+func (s *MinionSlot) getUnit(groundIdx vo.GroundIdx) vo.GroundUnit {
 	campIdx := groundIdx.ToCampIdx()
 	if groundIdx.IsEnemy() {
 		return s.EnemyMinions.Get(campIdx)
@@ -163,7 +163,7 @@ func (s *MinionSlot) getUnit(groundIdx vo.GroundIdx) Unit {
 	return s.AllyMinions.Get(campIdx)
 }
 
-func (s *MinionSlot) unitTakeAffect(unit Unit, affects vo.AttributeMap) {
+func (s *MinionSlot) unitTakeAffect(unit vo.GroundUnit, affects vo.AttributeMap) {
 	groundIdx := unit.GetGroundIdx()
 	campIDx := groundIdx.ToCampIdx()
 	minionSetFn := s.AllyMinions.Set
@@ -173,10 +173,10 @@ func (s *MinionSlot) unitTakeAffect(unit Unit, affects vo.AttributeMap) {
 	minionSetFn(campIDx, unit.TakeAffect(affects))
 }
 
-func (s *MinionSlot) allySummoner() Unit {
+func (s *MinionSlot) allySummoner() vo.GroundUnit {
 	return s.AllyMinions.GetSummoner()
 }
 
-func (s *MinionSlot) enemySummoner() Unit {
+func (s *MinionSlot) enemySummoner() vo.GroundUnit {
 	return s.EnemyMinions.GetSummoner()
 }

@@ -3,7 +3,7 @@ package vo
 import "github.com/shopspring/decimal"
 
 var (
-	SkillEmpty = Skill{
+	EmptySkill = Skill{
 		SkillType: SkillTypeEmpty,
 	}
 	SkillSlash = newSlashSkill()

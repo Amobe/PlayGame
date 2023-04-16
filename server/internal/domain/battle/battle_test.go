@@ -20,30 +20,32 @@ func TestBattle_Create(t *testing.T) {
 	assert.Equal(t, minionSlot, b.MinionSlot())
 }
 
-func getSummoner(isDead bool) *battle.MockUnit {
-	u := &battle.MockUnit{}
-	u.On("GetAgi").Return(0)
-	u.On("IsDead").Return(isDead)
-	return u
+func getUndeadUnit(groundIdx vo.GroundIdx) vo.GroundUnit {
+	undeadCharacter := vo.NewCharacterWithSkill(groundIdx.ToString(), vo.EmptySkill, vo.NewAttributeMap())
+	return vo.NewGroundUnit(groundIdx, undeadCharacter)
 }
 
-func getUnit(isDead bool) *battle.MockUnit {
-	u := &battle.MockUnit{}
-	u.On("IsDead").Return(isDead)
-	u.On("GetSkill").Return(vo.Skill{})
-	return u
-}
-
-func getDeadUnit() *battle.MockUnit {
-	return getUnit(true)
+func getDeadUnit(groundIdx vo.GroundIdx) vo.GroundUnit {
+	deadCharacter := vo.NewCharacterWithSkill(groundIdx.ToString(), vo.EmptySkill, vo.NewAttributeMap(vo.DeadAttribute))
+	return vo.NewGroundUnit(groundIdx, deadCharacter)
 }
 
 func TestBattle_FightToTheEnd_Draw(t *testing.T) {
 	allyMinions := &battle.Minions{
-		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
+		getDeadUnit(1),
+		getDeadUnit(2),
+		getDeadUnit(3),
+		getDeadUnit(4),
+		getDeadUnit(5),
+		getUndeadUnit(6),
 	}
 	enemyMinions := &battle.Minions{
-		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
+		getDeadUnit(7),
+		getDeadUnit(8),
+		getDeadUnit(9),
+		getDeadUnit(10),
+		getDeadUnit(11),
+		getUndeadUnit(12),
 	}
 	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
 	b, err := battle.CreateBattle("1", minionSlot)
@@ -57,10 +59,20 @@ func TestBattle_FightToTheEnd_Draw(t *testing.T) {
 
 func TestBattle_FightToTheEnd_AllyWon(t *testing.T) {
 	allyMinions := &battle.Minions{
-		getUnit(false), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
+		getUndeadUnit(1),
+		getDeadUnit(2),
+		getDeadUnit(3),
+		getDeadUnit(4),
+		getDeadUnit(5),
+		getUndeadUnit(6),
 	}
 	enemyMinions := &battle.Minions{
-		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(true),
+		getDeadUnit(7),
+		getDeadUnit(8),
+		getDeadUnit(9),
+		getDeadUnit(10),
+		getDeadUnit(11),
+		getDeadUnit(12),
 	}
 	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
 	b, err := battle.CreateBattle("1", minionSlot)
@@ -74,10 +86,20 @@ func TestBattle_FightToTheEnd_AllyWon(t *testing.T) {
 
 func TestBattle_FightToTheEnd_AllyLost(t *testing.T) {
 	alleyMinions := &battle.Minions{
-		getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(true),
+		getDeadUnit(1),
+		getDeadUnit(2),
+		getDeadUnit(3),
+		getDeadUnit(4),
+		getDeadUnit(5),
+		getDeadUnit(6),
 	}
 	enemyMinions := &battle.Minions{
-		getUnit(false), getDeadUnit(), getDeadUnit(), getDeadUnit(), getDeadUnit(), getSummoner(false),
+		getUndeadUnit(7),
+		getDeadUnit(8),
+		getDeadUnit(9),
+		getDeadUnit(10),
+		getDeadUnit(11),
+		getUndeadUnit(12),
 	}
 	minionSlot := battle.NewMinionSlot(alleyMinions, enemyMinions)
 	b, err := battle.CreateBattle("1", minionSlot)

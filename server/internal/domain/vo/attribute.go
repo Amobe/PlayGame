@@ -117,3 +117,7 @@ func GetDefaultAttributeValue(attributeType AttributeType) decimal.Decimal {
 	}
 	return value
 }
+
+var (
+	DeadAttribute = NewAttribute(AttributeTypeDead, decimal.NewFromInt(1))
+)
