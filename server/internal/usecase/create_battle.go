@@ -42,17 +42,17 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 
 	battleID := utils.NewUUID()
 	allyMinions := battle.NewAllyMinions([]vo.Character{
-		vo.NewCharacterWithSkill("a1", vo.SkillSlash,
+		vo.NewCharacterWithSkill(1, vo.SkillSlash,
 			vo.NewAttributeMap(
 				vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
 				vo.NewAttribute(vo.AttributeTypeHit, decimal.NewFromInt(100)),
 			),
 		),
-		vo.NewCharacter("a2", vo.NewAttributeMap()),
-		vo.NewCharacter("a3", vo.NewAttributeMap()),
-		vo.NewCharacter("a4", vo.NewAttributeMap()),
-		vo.NewCharacter("a5", vo.NewAttributeMap()),
-		vo.NewCharacter("a6", vo.NewAttributeMap()),
+		vo.NewCharacter(2, vo.NewAttributeMap()),
+		vo.NewCharacter(3, vo.NewAttributeMap()),
+		vo.NewCharacter(4, vo.NewAttributeMap()),
+		vo.NewCharacter(5, vo.NewAttributeMap()),
+		vo.NewCharacter(6, vo.NewAttributeMap()),
 	})
 	enemyMinions := battle.NewEnemyMinions(s.Characters)
 	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)

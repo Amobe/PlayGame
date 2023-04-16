@@ -51,7 +51,7 @@ func TestCharacter_Affect_DeadCondition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			attributes := vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(10)))
-			c := vo.NewCharacter("", attributes)
+			c := vo.NewCharacter(1, attributes)
 			got := c.TakeAffect(tt.args.attr).GetAttributeMap()
 			for _, want := range tt.wants {
 				actual := got.Get(want.Type).Value

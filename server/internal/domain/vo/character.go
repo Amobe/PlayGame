@@ -7,29 +7,29 @@ import (
 )
 
 type Character struct {
-	CharacterID string
-	Basement    AttributeMap
-	Equipment   Equipment
-	Skill       Skill
+	GroundIdx GroundIdx
+	Basement  AttributeMap
+	Equipment Equipment
+	Skill     Skill
 }
 
-func NewCharacter(id string, attrs AttributeMap) Character {
-	return NewCharacterWithSkill(id, EmptySkill, attrs)
+func NewCharacter(groundIdx GroundIdx, attrs AttributeMap) Character {
+	return NewCharacterWithSkill(groundIdx, EmptySkill, attrs)
 }
 
-func NewCharacterWithSkill(id string, skill Skill, attrs AttributeMap) Character {
+func NewCharacterWithSkill(groundIdx GroundIdx, skill Skill, attrs AttributeMap) Character {
 	c := Character{
-		CharacterID: id,
-		Basement:    attrs,
-		Skill:       skill,
+		GroundIdx: groundIdx,
+		Basement:  attrs,
+		Skill:     skill,
 	}
 	return c
 }
 
-func RandomCharacter(id string) Character {
+func RandomCharacter(groundIdx GroundIdx) Character {
 	hp := utils.GetRandIntInRange(100, 200)
 	atk := utils.GetRandIntInRange(20, 50)
-	return NewCharacter(id,
+	return NewCharacter(groundIdx,
 		NewAttributeMap(
 			NewAttribute(AttributeTypeHP, decimal.NewFromInt(int64(hp))),
 			NewAttribute(AttributeTypeATK, decimal.NewFromInt(int64(atk))),
@@ -37,8 +37,8 @@ func RandomCharacter(id string) Character {
 	)
 }
 
-func (c Character) ID() string {
-	return c.CharacterID
+func (c Character) GetGroundIdx() GroundIdx {
+	return c.GroundIdx
 }
 
 func (c Character) GetAttributeMap() AttributeMap {
@@ -76,8 +76,8 @@ func (c Character) TakeAffect(attrs AttributeMap) Character {
 	}
 
 	return Character{
-		CharacterID: c.CharacterID,
-		Basement:    c.Basement,
-		Equipment:   c.Equipment,
+		GroundIdx: c.GroundIdx,
+		Basement:  c.Basement,
+		Equipment: c.Equipment,
 	}
 }

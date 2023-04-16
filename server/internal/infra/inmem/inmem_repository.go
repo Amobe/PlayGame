@@ -17,12 +17,12 @@ func NewInmemStageRepository() *StageRepository {
 	fakeStage := &stage.Stage{
 		StageID: "fake",
 		Characters: []vo.Character{
-			vo.NewCharacter("e1", vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(100)))),
-			vo.NewCharacter("e2", vo.NewAttributeMap()),
-			vo.NewCharacter("e3", vo.NewAttributeMap()),
-			vo.NewCharacter("e4", vo.NewAttributeMap()),
-			vo.NewCharacter("e5", vo.NewAttributeMap()),
-			vo.NewCharacter("e6", vo.NewAttributeMap()),
+			vo.NewCharacter(1, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(100)))),
+			vo.NewCharacter(2, vo.NewAttributeMap()),
+			vo.NewCharacter(3, vo.NewAttributeMap()),
+			vo.NewCharacter(4, vo.NewAttributeMap()),
+			vo.NewCharacter(5, vo.NewAttributeMap()),
+			vo.NewCharacter(6, vo.NewAttributeMap()),
 		},
 	}
 	s.Create(fakeStage)

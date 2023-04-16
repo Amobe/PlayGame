@@ -20,14 +20,12 @@ func TestBattle_Create(t *testing.T) {
 	assert.Equal(t, minionSlot, b.MinionSlot())
 }
 
-func getUndeadUnit(groundIdx vo.GroundIdx) vo.GroundUnit {
-	undeadCharacter := vo.NewCharacterWithSkill(groundIdx.ToString(), vo.EmptySkill, vo.NewAttributeMap())
-	return vo.NewGroundUnit(groundIdx, undeadCharacter)
+func getUndeadUnit(groundIdx vo.GroundIdx) vo.Character {
+	return vo.NewCharacterWithSkill(groundIdx, vo.EmptySkill, vo.NewAttributeMap())
 }
 
-func getDeadUnit(groundIdx vo.GroundIdx) vo.GroundUnit {
-	deadCharacter := vo.NewCharacterWithSkill(groundIdx.ToString(), vo.EmptySkill, vo.NewAttributeMap(vo.DeadAttribute))
-	return vo.NewGroundUnit(groundIdx, deadCharacter)
+func getDeadUnit(groundIdx vo.GroundIdx) vo.Character {
+	return vo.NewCharacterWithSkill(groundIdx, vo.EmptySkill, vo.NewAttributeMap(vo.DeadAttribute))
 }
 
 func TestBattle_FightToTheEnd_Draw(t *testing.T) {
