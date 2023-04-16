@@ -2,7 +2,6 @@ package config
 
 import (
 	"embed"
-	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"

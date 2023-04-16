@@ -2,10 +2,8 @@ package battle
 
 import "github.com/Amobe/PlayGame/server/internal/utils/domain"
 
-type coreEvent = domain.CoreEvent
-
 type EventBattleCreated struct {
-	coreEvent
+	domain.CoreEvent
 	BattleID   string
 	MinionSlot *MinionSlot
 }
@@ -15,7 +13,7 @@ func (EventBattleCreated) Name() string {
 }
 
 type EventBattleWon struct {
-	coreEvent
+	domain.CoreEvent
 }
 
 func (EventBattleWon) Name() string {
@@ -23,7 +21,7 @@ func (EventBattleWon) Name() string {
 }
 
 type EventBattleLost struct {
-	coreEvent
+	domain.CoreEvent
 }
 
 func (EventBattleLost) Name() string {
@@ -31,7 +29,7 @@ func (EventBattleLost) Name() string {
 }
 
 type EventBattleDraw struct {
-	coreEvent
+	domain.CoreEvent
 }
 
 func (EventBattleDraw) Name() string {

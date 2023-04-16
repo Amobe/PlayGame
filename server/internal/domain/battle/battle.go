@@ -7,7 +7,7 @@ import (
 	"github.com/Amobe/PlayGame/server/internal/utils/domain"
 )
 
-var _ domain.Aggregator = Battle{}
+var _ domain.Aggregator = &Battle{}
 
 type coreAggregator = domain.CoreAggregator
 
@@ -30,26 +30,26 @@ func (b Battle) MinionSlot() *MinionSlot {
 	return b.minionSlot
 }
 
-func newBattle() Battle {
-	return Battle{}
+func newBattle() *Battle {
+	return &Battle{}
 }
 
-func AggregatorLoader(events []domain.Event) (Battle, error) {
+func AggregatorLoader(events []domain.Event) (*Battle, error) {
 	b := newBattle()
 	if err := b.apply(false, events...); err != nil {
-		return Battle{}, fmt.Errorf("apply battle events: %w", err)
+		return nil, fmt.Errorf("apply battle events: %w", err)
 	}
 	return b, nil
 }
 
-func CreateBattle(id string, minionSlot *MinionSlot) (Battle, error) {
+func CreateBattle(id string, minionSlot *MinionSlot) (*Battle, error) {
 	createdEvent := EventBattleCreated{
 		BattleID:   id,
 		MinionSlot: minionSlot,
 	}
 	b := newBattle()
 	if err := b.applyNew(createdEvent); err != nil {
-		return Battle{}, fmt.Errorf("apply battle created event: %w", err)
+		return nil, fmt.Errorf("apply battle created event: %w", err)
 	}
 	return b, nil
 }

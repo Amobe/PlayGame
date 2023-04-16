@@ -155,14 +155,6 @@ func calculateAttackDamage(attacker, target vo.GroundUnit, skill vo.Skill) (dama
 	return calculator.CalculateDamage(da, dt)
 }
 
-func (s *MinionSlot) getUnit(groundIdx vo.GroundIdx) vo.GroundUnit {
-	campIdx := groundIdx.ToCampIdx()
-	if groundIdx.IsEnemy() {
-		return s.EnemyMinions.Get(campIdx)
-	}
-	return s.AllyMinions.Get(campIdx)
-}
-
 func (s *MinionSlot) unitTakeAffect(unit vo.GroundUnit, affects vo.AttributeMap) {
 	groundIdx := unit.GetGroundIdx()
 	campIDx := groundIdx.ToCampIdx()

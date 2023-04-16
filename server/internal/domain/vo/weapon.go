@@ -91,33 +91,33 @@ var weaponTypeMap = map[string]WeaponType{
 	WeaponTypeShield.String(): WeaponTypeShield,
 }
 
-var weaponTypeSlotMap = map[WeaponType]WeaponSlot{
-	WeaponTypeEmpty:  WeaponSlotAny,
-	WeaponTypeKnife:  WeaponSlotMajorHand,
-	WeaponTypeDagger: WeaponSlotAny,
-	WeaponTypeBow:    WeaponSlotMajorHand,
-	WeaponTypeAxe:    WeaponSlotBothHand,
-	WeaponTypeRod:    WeaponSlotAny,
-	WeaponTypeWand:   WeaponSlotBothHand,
-	WeaponTypeOrb:    WeaponSlotAny,
-	WeaponTypeBook:   WeaponSlotAny,
-	WeaponTypeArrow:  WeaponSlotMinorHand,
-	WeaponTypeShield: WeaponSlotMinorHand,
-}
+//var weaponTypeSlotMap = map[WeaponType]WeaponSlot{
+//	WeaponTypeEmpty:  WeaponSlotAny,
+//	WeaponTypeKnife:  WeaponSlotMajorHand,
+//	WeaponTypeDagger: WeaponSlotAny,
+//	WeaponTypeBow:    WeaponSlotMajorHand,
+//	WeaponTypeAxe:    WeaponSlotBothHand,
+//	WeaponTypeRod:    WeaponSlotAny,
+//	WeaponTypeWand:   WeaponSlotBothHand,
+//	WeaponTypeOrb:    WeaponSlotAny,
+//	WeaponTypeBook:   WeaponSlotAny,
+//	WeaponTypeArrow:  WeaponSlotMinorHand,
+//	WeaponTypeShield: WeaponSlotMinorHand,
+//}
 
-var weaponTypePairMap = map[string]bool{
-	getWeaponTypePairKey(WeaponTypeKnife, WeaponTypeShield):  true,
-	getWeaponTypePairKey(WeaponTypeDagger, WeaponTypeDagger): true,
-	getWeaponTypePairKey(WeaponTypeDagger, WeaponTypeShield): true,
-	getWeaponTypePairKey(WeaponTypeBow, WeaponTypeArrow):     true,
-	getWeaponTypePairKey(WeaponTypeRod, WeaponTypeOrb):       true,
-	getWeaponTypePairKey(WeaponTypeRod, WeaponTypeBook):      true,
-	getWeaponTypePairKey(WeaponTypeOrb, WeaponTypeRod):       true,
-	getWeaponTypePairKey(WeaponTypeOrb, WeaponTypeBook):      true,
-	getWeaponTypePairKey(WeaponTypeBook, WeaponTypeRod):      true,
-	getWeaponTypePairKey(WeaponTypeBook, WeaponTypeOrb):      true,
-}
+//var weaponTypePairMap = map[string]bool{
+//	getWeaponTypePairKey(WeaponTypeKnife, WeaponTypeShield):  true,
+//	getWeaponTypePairKey(WeaponTypeDagger, WeaponTypeDagger): true,
+//	getWeaponTypePairKey(WeaponTypeDagger, WeaponTypeShield): true,
+//	getWeaponTypePairKey(WeaponTypeBow, WeaponTypeArrow):     true,
+//	getWeaponTypePairKey(WeaponTypeRod, WeaponTypeOrb):       true,
+//	getWeaponTypePairKey(WeaponTypeRod, WeaponTypeBook):      true,
+//	getWeaponTypePairKey(WeaponTypeOrb, WeaponTypeRod):       true,
+//	getWeaponTypePairKey(WeaponTypeOrb, WeaponTypeBook):      true,
+//	getWeaponTypePairKey(WeaponTypeBook, WeaponTypeRod):      true,
+//	getWeaponTypePairKey(WeaponTypeBook, WeaponTypeOrb):      true,
+//}
 
-func getWeaponTypePairKey(major, minor WeaponType) string {
-	return fmt.Sprintf("%s:%s", major.String(), minor.String())
-}
+//func getWeaponTypePairKey(major, minor WeaponType) string {
+//	return fmt.Sprintf("%s:%s", major.String(), minor.String())
+//}

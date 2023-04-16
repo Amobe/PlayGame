@@ -59,11 +59,11 @@ const (
 	JobTypeHermit      JobType = "hermit"
 )
 
-var jobAvailableWeaponTypes = map[JobType][]WeaponType{
-	JobTypeWarrior:    {WeaponTypeKnife, WeaponTypeShield},
-	JobTypeKnight:     {WeaponTypeKnife, WeaponTypeShield},
-	JobTypeDarkKnight: {WeaponTypeKnife, WeaponTypeShield},
-	JobTypeThief:      {WeaponTypeDagger, WeaponTypeShield},
-	JobTypeAssassin:   {WeaponTypeKnife, WeaponTypeDagger, WeaponTypeShield},
-	JobTypeHermit:     {WeaponTypeKnife, WeaponTypeDagger, WeaponTypeShield},
-}
+//var jobAvailableWeaponTypes = map[JobType][]WeaponType{
+//	JobTypeWarrior:    {WeaponTypeKnife, WeaponTypeShield},
+//	JobTypeKnight:     {WeaponTypeKnife, WeaponTypeShield},
+//	JobTypeDarkKnight: {WeaponTypeKnife, WeaponTypeShield},
+//	JobTypeThief:      {WeaponTypeDagger, WeaponTypeShield},
+//	JobTypeAssassin:   {WeaponTypeKnife, WeaponTypeDagger, WeaponTypeShield},
+//	JobTypeHermit:     {WeaponTypeKnife, WeaponTypeDagger, WeaponTypeShield},
+//}

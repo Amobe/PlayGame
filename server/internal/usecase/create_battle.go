@@ -16,7 +16,7 @@ type CreateBattleInput struct {
 }
 
 type CreateBattleOutput struct {
-	Battle battle.Battle
+	Battle *battle.Battle
 }
 
 type CreateBattleUsecase struct {

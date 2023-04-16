@@ -3,7 +3,7 @@ version: '3.9'
 services:
   game_service:
     restart: always
-    image: playgame/server:v1
+    image: playgame/server:latest
     networks:
       - game_app_network
     ports:
