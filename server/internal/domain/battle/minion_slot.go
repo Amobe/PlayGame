@@ -38,9 +38,6 @@ func NewMinionSlot(allyMinions, enemyMinions *Minions) *MinionSlot {
 		AllyMinions:  allyMinions,
 		EnemyMinions: enemyMinions,
 		Status:       MinionSlotStatusStarted,
-
-		calculateAttackDamageFn: defaultCalculateAttackDamageFn,
-		targetPickerFn:          defaultTargetPickerFn,
 	}
 }
 
@@ -110,7 +107,7 @@ func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker vo.Charac
 func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []vo.Character) {
 	return func(number int) (targets []vo.Character) {
 		targets = make([]vo.Character, 0, number)
-		randIdx := s.targetPickerFn(1, 5, number)
+		randIdx := s.getTargetPickerFn()(1, 5, number)
 		for _, idx := range randIdx {
 			target := minions.Get(vo.CampIdx(idx))
 			if target.IsDead() {
@@ -120,6 +117,13 @@ func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []
 		}
 		return targets
 	}
+}
+
+func (s *MinionSlot) getTargetPickerFn() targetPickerFn {
+	if s.targetPickerFn != nil {
+		return s.targetPickerFn
+	}
+	return defaultTargetPickerFn
 }
 
 func targetPickerFromFirst(min, max, number int) []int {
@@ -132,7 +136,7 @@ func targetPickerFromFirst(min, max, number int) []int {
 
 func (s *MinionSlot) attack(attacker, target vo.Character) vo.Affect {
 	skill := attacker.GetSkill()
-	damage, isHit := s.calculateAttackDamageFn(attacker, target, skill)
+	damage, isHit := s.getCalculateAttackDamageFn()(attacker, target, skill)
 	if !isHit {
 		return vo.NewMissAffect(attacker.GetGroundIdx(), target.GetGroundIdx())
 	}
@@ -144,6 +148,13 @@ func (s *MinionSlot) attack(attacker, target vo.Character) vo.Affect {
 	)
 	s.unitTakeAffect(target, affects)
 	return vo.NewAffect(attacker.GetGroundIdx(), target.GetGroundIdx(), skill.Name, affects)
+}
+
+func (s *MinionSlot) getCalculateAttackDamageFn() calculateAttackDamageFn {
+	if s.calculateAttackDamageFn != nil {
+		return s.calculateAttackDamageFn
+	}
+	return defaultCalculateAttackDamageFn
 }
 
 func calculateAttackDamage(attacker, target vo.Character, skill vo.Skill) (damage decimal.Decimal, isHit bool) {

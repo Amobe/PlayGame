@@ -1,7 +1,6 @@
 package database
 
 import (
-	"errors"
 	"fmt"
 
 	"gorm.io/driver/postgres"
@@ -11,45 +10,6 @@ import (
 	"github.com/Amobe/PlayGame/server/internal/utils"
 	"github.com/Amobe/PlayGame/server/internal/utils/domain"
 )
-
-type BattleGorm struct {
-	gorm.Model
-	BattleID     string `gorm:"column:battle_id;type:varchar(64);uniqueIndex"`
-	AllyMinions  []byte `gorm:"column:ally_minions;type:bytes;serializer:json"`
-	EnemyMinions []byte `gorm:"column:enemy_minions;type:bytes;serializer:json"`
-}
-
-func BattleGormFromEntity(b *battle.Battle) (BattleGorm, error) {
-	allyMinionsJson, err := utils.MarshalToJSON(b.MinionSlot().AllyMinions)
-	if err != nil {
-		return BattleGorm{}, fmt.Errorf("marshal ally minions: %w", err)
-	}
-	enemyMinionsJson, err := utils.MarshalToJSON(b.MinionSlot().EnemyMinions)
-	if err != nil {
-		return BattleGorm{}, fmt.Errorf("marshal enemy minions: %w", err)
-	}
-
-	return BattleGorm{
-		BattleID:     b.ID(),
-		AllyMinions:  allyMinionsJson,
-		EnemyMinions: enemyMinionsJson,
-	}, nil
-}
-
-func (b BattleGorm) ToEntity() (*battle.Battle, error) {
-	var allyMinions, enemyMinions battle.Minions
-	if err := utils.UnmarshalFromJSON(b.AllyMinions, &allyMinions); err != nil {
-		return nil, fmt.Errorf("unmarshal ally minions: %w", err)
-	}
-	if err := utils.UnmarshalFromJSON(b.EnemyMinions, &enemyMinions); err != nil {
-		return nil, fmt.Errorf("unmarshal enemy minions: %w", err)
-	}
-	return battle.CreateBattle(b.BattleID, battle.NewMinionSlot(&allyMinions, &enemyMinions))
-}
-
-func (BattleGorm) TableName() string {
-	return "battle"
-}
 
 type BattleEventGorm struct {
 	gorm.Model
@@ -75,6 +35,43 @@ func BattleEventGormListFromEntity(battleID string, events []domain.Event) ([]Ba
 	return battleEventGormList, nil
 }
 
+func (b BattleEventGorm) ToDomainEvent() (domain.Event, error) {
+	// TODO: use generic to replace this
+	switch b.EventType {
+	case battle.EventBattleCreated{}.Name():
+		var event battle.EventBattleCreated
+		if err := utils.UnmarshalFromJSON(b.EventData, &event); err != nil {
+			return nil, fmt.Errorf("unmarshal battle created event: %w", err)
+		}
+		return event, nil
+	case battle.EventBattleFought{}.Name():
+		var event battle.EventBattleFought
+		if err := utils.UnmarshalFromJSON(b.EventData, &event); err != nil {
+			return nil, fmt.Errorf("unmarshal battle fought event: %w", err)
+		}
+		return event, nil
+	case battle.EventBattleWon{}.Name():
+		var event battle.EventBattleWon
+		if err := utils.UnmarshalFromJSON(b.EventData, &event); err != nil {
+			return nil, fmt.Errorf("unmarshal battle won event: %w", err)
+		}
+		return event, nil
+	case battle.EventBattleLost{}.Name():
+		var event battle.EventBattleLost
+		if err := utils.UnmarshalFromJSON(b.EventData, &event); err != nil {
+			return nil, fmt.Errorf("unmarshal battle lost event: %w", err)
+		}
+		return event, nil
+	case battle.EventBattleDraw{}.Name():
+		var event battle.EventBattleDraw
+		if err := utils.UnmarshalFromJSON(b.EventData, &event); err != nil {
+			return nil, fmt.Errorf("unmarshal battle draw event: %w", err)
+		}
+		return event, nil
+	}
+	return nil, fmt.Errorf("unknown event type: %s", b.EventType)
+}
+
 func (BattleEventGorm) TableName() string {
 	return "battle_event"
 }
@@ -87,9 +84,6 @@ func NewBattleGormRepository(config Config) (*BattleGormRepository, error) {
 	client, err := gorm.Open(postgres.Open(GetDSN(config)), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("connect battle gorm: %w", err)
-	}
-	if err := client.AutoMigrate(&BattleGorm{}); err != nil {
-		return nil, fmt.Errorf("migrate battle gorm: %w", err)
 	}
 	if err := client.AutoMigrate(&BattleEventGorm{}); err != nil {
 		return nil, fmt.Errorf("migrate battle event gorm: %w", err)
@@ -104,69 +98,37 @@ func NewBattleGormRepository(config Config) (*BattleGormRepository, error) {
 
 // Get gets battle by battle id
 func (r *BattleGormRepository) Get(battleID string) (*battle.Battle, error) {
-	battleGorm, err := r.get(battleID)
-	if err != nil {
-		return nil, fmt.Errorf("get battle gorm: %w", err)
+	var battleEventGormList []BattleEventGorm
+	if err := r.client.
+		Order("created_at asc, id asc").
+		Where("battle_id = ?", battleID).
+		Find(&battleEventGormList).
+		Error; err != nil {
+		return nil, fmt.Errorf("find battle event: %w", err)
 	}
-	return battleGorm.ToEntity()
+	battleEventList := make([]domain.Event, 0, len(battleEventGormList))
+	for _, battleEventGorm := range battleEventGormList {
+		event, err := battleEventGorm.ToDomainEvent()
+		if err != nil {
+			return nil, fmt.Errorf("battle event gorm to domain event: %w", err)
+		}
+		battleEventList = append(battleEventList, event)
+	}
+	battleEntity, err := battle.AggregatorLoader(battleEventList)
+	if err != nil {
+		return nil, fmt.Errorf("aggregate battle: %w", err)
+	}
+	return battleEntity, nil
 }
 
 // Save saves battle
 func (r *BattleGormRepository) Save(b *battle.Battle) error {
-	gormBattle, err := r.get(b.ID())
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return r.create(b)
-	} else if err != nil {
-		return fmt.Errorf("get battle gorm: %w", err)
-	}
-	return r.update(gormBattle.Model, b)
-}
-
-// get gets battle by battle id
-func (r *BattleGormRepository) get(battleID string) (*BattleGorm, error) {
-	var battleGorm BattleGorm
-	if err := r.client.Where("battle_id = ?", battleID).First(&battleGorm).Error; err != nil {
-		return nil, fmt.Errorf("find battle: %w", err)
-	}
-	return &battleGorm, nil
-}
-
-// create creates battle
-func (r *BattleGormRepository) create(b *battle.Battle) error {
-	battleGorm, err := BattleGormFromEntity(b)
-	if err != nil {
-		return fmt.Errorf("from entity: %w", err)
-	}
-	if err := r.client.Create(&battleGorm).Error; err != nil {
-		return fmt.Errorf("create battle: %w", err)
-	}
-	return nil
-}
-
-// update updates battle
-func (r *BattleGormRepository) update(gormModel gorm.Model, b *battle.Battle) error {
-	battleGorm, err := BattleGormFromEntity(b)
-	if err != nil {
-		return fmt.Errorf("battle from entity: %w", err)
-	}
-	battleGorm.Model = gormModel
-
 	battleEventGormList, err := BattleEventGormListFromEntity(b.ID(), b.Events())
 	if err != nil {
 		return fmt.Errorf("battle event from entity: %w", err)
 	}
-
-	if err := r.client.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Save(&battleGorm).Where("battle_id", b.ID()).Error; err != nil {
-			return fmt.Errorf("save battle: %w", err)
-		}
-		if err := tx.CreateInBatches(battleEventGormList, 100).Error; err != nil {
-			return fmt.Errorf("create battle event: %w", err)
-		}
-		return nil
-	}); err != nil {
-		return fmt.Errorf("transaction: %w", err)
+	if err := r.client.CreateInBatches(battleEventGormList, 100).Error; err != nil {
+		return fmt.Errorf("save battle event: %w", err)
 	}
-
 	return nil
 }

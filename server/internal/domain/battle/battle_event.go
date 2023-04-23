@@ -1,6 +1,9 @@
 package battle
 
-import "github.com/Amobe/PlayGame/server/internal/utils/domain"
+import (
+	"github.com/Amobe/PlayGame/server/internal/domain/vo"
+	"github.com/Amobe/PlayGame/server/internal/utils/domain"
+)
 
 type EventBattleCreated struct {
 	domain.CoreEvent
@@ -10,6 +13,15 @@ type EventBattleCreated struct {
 
 func (EventBattleCreated) Name() string {
 	return "battle_created"
+}
+
+type EventBattleFought struct {
+	domain.CoreEvent
+	Affects []vo.Affect
+}
+
+func (EventBattleFought) Name() string {
+	return "battle_fought"
 }
 
 type EventBattleWon struct {

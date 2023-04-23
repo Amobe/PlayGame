@@ -82,6 +82,9 @@ func (b *Battle) FightToTheEnd() ([]vo.Affect, error) {
 
 func (b *Battle) fight() ([]vo.Affect, error) {
 	affects := b.minionSlot.PlayOneRound()
+	if err := b.applyNew(EventBattleFought{Affects: affects}); err != nil {
+		return nil, fmt.Errorf("apply battle fought event: %w", err)
+	}
 	if b.minionSlot.Status == MinionSlotStatusAllyWon {
 		if err := b.applyNew(EventBattleWon{}); err != nil {
 			return nil, fmt.Errorf("apply battle won event: %w", err)
@@ -106,6 +109,10 @@ func (b *Battle) apply(new bool, events ...domain.Event) error {
 			b.battleID = ev.BattleID
 			b.status = StatusUnspecified
 			b.minionSlot = ev.MinionSlot
+		case EventBattleFought:
+			// TODO: the model changed before apply event, so the event is not valid.
+			// Take the affects from event and apply to model.
+			continue
 		case EventBattleWon:
 			b.status = StatusWon
 		case EventBattleLost:
