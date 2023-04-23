@@ -83,8 +83,8 @@ type BattleGormRepository struct {
 	client *gorm.DB
 }
 
-func NewBattleGormRepository(dsn string) (*BattleGormRepository, error) {
-	client, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func NewBattleGormRepository(config Config) (*BattleGormRepository, error) {
+	client, err := gorm.Open(postgres.Open(GetDSN(config)), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("connect battle gorm: %w", err)
 	}

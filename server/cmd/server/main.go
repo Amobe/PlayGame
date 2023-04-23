@@ -28,8 +28,11 @@ func run() error {
 		return fmt.Errorf("listen on %s: %w", listenOn, err)
 	}
 
-	battleGormDSN := "host=localhost port=5432 user=gorm password=gorm dbname=game_db sslmode=disable TimeZone=Asia/Taipei"
-	battleGormRepo, err := database.NewBattleGormRepository(battleGormDSN)
+	battleGormConfig, err := database.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("load battle gorm config: %w", err)
+	}
+	battleGormRepo, err := database.NewBattleGormRepository(battleGormConfig)
 	if err != nil {
 		return fmt.Errorf("new battle gorm repository: %w", err)
 	}
