@@ -8,7 +8,7 @@ services:
       DB_HOST: dbsql-server
       DB_PORT: 5432
       DB_USER: gorm
-      DB_PASS: /run/secrets/db_password
+      DB_PASS: ${DB_PASS}
       DB_NAME: game_db
     networks:
       - game_app_network
@@ -16,12 +16,13 @@ services:
       - db:dbsql-server
     ports:
       - "8080:8080"
+      - "4000:4000"
   db:
     restart: always
     image: postgres:15.2-alpine3.17
     environment:
       POSTGRES_USER: gorm
-      POSTGRES_PASSWORD: /run/secrets/db_password
+      POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: game_db
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
@@ -34,8 +35,8 @@ services:
     restart: always
     image: dpage/pgadmin4:7.0
     environment:
-      PGADMIN_DEFAULT_EMAIL: amobe.momoko@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: /run/secrets/pgadmin_password
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_USER}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
       PGADMIN_LISTEN_PORT: 80
     ports:
       - "28080:80"
@@ -52,8 +53,3 @@ networks:
 volumes:
   db-data:
   pgadmin-data:
-secrets:
-  db_password:
-    file: ./secrets/db_password.txt
-  pgadmin_password:
-    file: ./secrets/pgadmin_password.txt
