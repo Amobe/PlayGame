@@ -21,9 +21,7 @@ func NewMinions(isAlly bool, characters []vo.Character) *Minions {
 	//	startIdx = 7
 	//}
 	m := &Minions{}
-	for i, c := range characters {
-		m[i] = c
-	}
+	copy(m[:], characters)
 	return m
 }
 
