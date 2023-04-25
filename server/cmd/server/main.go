@@ -28,11 +28,16 @@ func run() error {
 		return fmt.Errorf("listen on %s: %w", listenOn, err)
 	}
 
-	battleGormConfig, err := database.LoadConfig()
+	dbConfig, err := database.LoadConfig()
 	if err != nil {
-		return fmt.Errorf("load battle gorm config: %w", err)
+		return fmt.Errorf("load database config: %w", err)
 	}
-	battleGormRepo, err := database.NewBattleGormRepository(battleGormConfig)
+	dbClient, err := database.NewClient(dbConfig)
+	if err != nil {
+		return fmt.Errorf("new database client: %w", err)
+	}
+
+	battleGormRepo, err := database.NewBattleGormRepository(dbClient)
 	if err != nil {
 		return fmt.Errorf("new battle gorm repository: %w", err)
 	}

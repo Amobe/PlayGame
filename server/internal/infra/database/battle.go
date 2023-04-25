@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/Amobe/PlayGame/server/internal/domain/battle"
@@ -80,16 +79,9 @@ type BattleGormRepository struct {
 	client *gorm.DB
 }
 
-func NewBattleGormRepository(config Config) (*BattleGormRepository, error) {
-	client, err := gorm.Open(postgres.Open(GetDSN(config)), &gorm.Config{})
-	if err != nil {
-		return nil, fmt.Errorf("connect battle gorm: %w", err)
-	}
+func NewBattleGormRepository(client *gorm.DB) (*BattleGormRepository, error) {
 	if err := client.AutoMigrate(&BattleEventGorm{}); err != nil {
 		return nil, fmt.Errorf("migrate battle event gorm: %w", err)
-	}
-	if err != nil {
-		return nil, err
 	}
 	return &BattleGormRepository{
 		client: client,
