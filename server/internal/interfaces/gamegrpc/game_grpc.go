@@ -34,7 +34,7 @@ func NewGameServiceHandler(deps GameServiceDeps) *GameServiceHandler {
 func (s *GameServiceHandler) NewBattle(ctx context.Context, req *gamev1.NewBattleRequest) (*gamev1.NewBattleResponse, error) {
 	log.Println("NewBattle")
 	in := usecase.CreateBattleInput{
-		StageID: "fake",
+		StageID: req.GetStageId(),
 	}
 	uc := usecase.NewCreateBattleUsecase(s.stageRepo, s.battleRepo)
 	out, err := uc.Execute(in)

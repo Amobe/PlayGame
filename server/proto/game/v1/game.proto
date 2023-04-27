@@ -9,7 +9,9 @@ service GameService {
   rpc Fight(FightRequest) returns (FightResponse) {}
 }
 
-message NewBattleRequest {}
+message NewBattleRequest {
+  string stage_id = 1;
+}
 
 message NewBattleResponse {
   string battle_id = 1;

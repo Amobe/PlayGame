@@ -58,6 +58,7 @@ func newSlashSkill() Skill {
 		Name:      "slash",
 		AttributeMap: NewAttributeMap(
 			NewAttribute(AttributeTypeTarget, decimal.NewFromInt(1)),
+			NewAttribute(AttributeTypeSDR, decimal.NewFromInt(1)),
 		),
 	}
 }
