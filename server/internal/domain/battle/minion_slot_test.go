@@ -9,15 +9,15 @@ import (
 	"github.com/Amobe/PlayGame/server/internal/domain/vo"
 )
 
-func getMockMinions() (ally *Minions, enemy *Minions) {
-	return &Minions{
+func getMockMinions() (ally vo.Camp, enemy vo.Camp) {
+	return vo.Camp{
 			vo.NewCharacter(1, vo.NewAttributeMap()),
 			vo.NewCharacter(2, vo.NewAttributeMap()),
 			vo.NewCharacter(3, vo.NewAttributeMap()),
 			vo.NewCharacter(4, vo.NewAttributeMap()),
 			vo.NewCharacter(5, vo.NewAttributeMap()),
 			vo.NewCharacter(6, vo.NewAttributeMap()),
-		}, &Minions{
+		}, vo.Camp{
 			vo.NewCharacter(7, vo.NewAttributeMap()),
 			vo.NewCharacter(8, vo.NewAttributeMap()),
 			vo.NewCharacter(9, vo.NewAttributeMap()),
@@ -198,7 +198,7 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &MinionSlot{
-				AllyMinions: &Minions{
+				AllyMinions: vo.Camp{
 					vo.NewCharacter(1, vo.NewAttributeMap()),
 					vo.NewCharacter(2, vo.NewAttributeMap()),
 					vo.NewCharacter(3, vo.NewAttributeMap()),
@@ -206,7 +206,7 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 					vo.NewCharacter(5, vo.NewAttributeMap()),
 					vo.NewCharacter(6, vo.NewAttributeMap()),
 				},
-				EnemyMinions: &Minions{
+				EnemyMinions: vo.Camp{
 					vo.NewCharacter(7, vo.NewAttributeMap()),
 					vo.NewCharacter(8, vo.NewAttributeMap()),
 					vo.NewCharacter(9, vo.NewAttributeMap()),
@@ -216,7 +216,8 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 				},
 				targetPickerFn: defaultTargetPickerFn,
 			}
-			gotAttacker, gotTargets := s.getAttackerAndTargets(tt.args.idx)
+			gotAttacker, gotTargets, err := s.getAttackerAndTargets(tt.args.idx)
+			assert.NoError(t, err)
 			assert.Equalf(t, tt.wantAttackerGroundIdx, gotAttacker.GetGroundIdx(), "getAttackerAndTargets(%v)", tt.args.idx)
 			for i, target := range gotTargets {
 				assert.Equalf(t, tt.wantTargetsGroundIdx[i], target.GetGroundIdx(), "getAttackerAndTargets(%v)", tt.args.idx)
@@ -227,8 +228,8 @@ func Test_MinionSlot_getAttackerAndTargets(t *testing.T) {
 
 func Test_MinionSlot_getActionOrder(t *testing.T) {
 	type fields struct {
-		AllyMinions  *Minions
-		EnemyMinions *Minions
+		AllyMinions  vo.Camp
+		EnemyMinions vo.Camp
 	}
 	tests := []struct {
 		name   string
@@ -238,7 +239,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 		{
 			name: "enemy summoner is faster than ally summoner",
 			fields: fields{
-				AllyMinions: &Minions{
+				AllyMinions: vo.Camp{
 					vo.NewCharacter(1, vo.NewAttributeMap()),
 					vo.NewCharacter(2, vo.NewAttributeMap()),
 					vo.NewCharacter(3, vo.NewAttributeMap()),
@@ -247,7 +248,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 					// Only check summoner agi
 					vo.NewCharacter(6, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(50)))),
 				},
-				EnemyMinions: &Minions{
+				EnemyMinions: vo.Camp{
 					vo.NewCharacter(7, vo.NewAttributeMap()),
 					vo.NewCharacter(8, vo.NewAttributeMap()),
 					vo.NewCharacter(9, vo.NewAttributeMap()),
@@ -262,7 +263,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 		{
 			name: "ally summoner is faster than enemy summoner",
 			fields: fields{
-				AllyMinions: &Minions{
+				AllyMinions: vo.Camp{
 					vo.NewCharacter(1, vo.NewAttributeMap()),
 					vo.NewCharacter(2, vo.NewAttributeMap()),
 					vo.NewCharacter(3, vo.NewAttributeMap()),
@@ -271,7 +272,7 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 					// Only check summoner agi
 					vo.NewCharacter(6, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(100)))),
 				},
-				EnemyMinions: &Minions{
+				EnemyMinions: vo.Camp{
 					vo.NewCharacter(7, vo.NewAttributeMap()),
 					vo.NewCharacter(8, vo.NewAttributeMap()),
 					vo.NewCharacter(9, vo.NewAttributeMap()),
@@ -290,7 +291,9 @@ func Test_MinionSlot_getActionOrder(t *testing.T) {
 				AllyMinions:  tt.fields.AllyMinions,
 				EnemyMinions: tt.fields.EnemyMinions,
 			}
-			assert.Equalf(t, tt.want, s.getActionOrder(), "getActionOrder()")
+			got, err := s.getActionOrder()
+			assert.NoError(t, err)
+			assert.Equalf(t, tt.want, got, "getActionOrder()")
 		})
 	}
 }
@@ -302,8 +305,8 @@ func Test_MinionSlot_Act(t *testing.T) {
 	}
 
 	type fields struct {
-		AllyMinions             *Minions
-		EnemyMinions            *Minions
+		AllyMinions             vo.Camp
+		EnemyMinions            vo.Camp
 		calculateAttackDamageFn calculateAttackDamageFn
 		targetPickerFn          targetPickerFn
 	}
@@ -320,11 +323,11 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "produce no affect when actor is dead",
 			fields: fields{
-				AllyMinions: &Minions{
+				AllyMinions: vo.Camp{
 					vo.NewCharacter(1, vo.NewAttributeMap(vo.DeadAttribute)),
 				},
 				// when actor is dead, the target picker will return nil.
-				EnemyMinions:   &Minions{},
+				EnemyMinions:   vo.Camp{},
 				targetPickerFn: defaultTargetPickerFn,
 			},
 			args:        args{actorIdx: 1},
@@ -333,7 +336,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "actor attacks two enemy units and produce affects",
 			fields: fields{
-				AllyMinions: &Minions{
+				AllyMinions: vo.Camp{
 					vo.NewCharacterWithSkill(1, getAttackSkillWithTarget(2), vo.NewAttributeMap()),
 					vo.NewCharacter(2, vo.NewAttributeMap()),
 					vo.NewCharacter(3, vo.NewAttributeMap()),
@@ -341,7 +344,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 					vo.NewCharacter(5, vo.NewAttributeMap()),
 					vo.NewCharacter(6, vo.NewAttributeMap()),
 				},
-				EnemyMinions: &Minions{
+				EnemyMinions: vo.Camp{
 					vo.NewCharacter(7, vo.NewAttributeMap()),
 					vo.NewCharacter(8, vo.NewAttributeMap()),
 					vo.NewCharacter(9, vo.NewAttributeMap()),
@@ -375,7 +378,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "ally won when enemy summoner is dead",
 			fields: fields{
-				AllyMinions: &Minions{
+				AllyMinions: vo.Camp{
 					vo.NewCharacterWithSkill(1, getAttackSkillWithTarget(0), vo.NewAttributeMap()),
 					vo.NewCharacter(2, vo.NewAttributeMap()),
 					vo.NewCharacter(3, vo.NewAttributeMap()),
@@ -383,7 +386,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 					vo.NewCharacter(5, vo.NewAttributeMap()),
 					vo.NewCharacter(6, vo.NewAttributeMap()),
 				},
-				EnemyMinions: &Minions{
+				EnemyMinions: vo.Camp{
 					vo.NewCharacter(7, vo.NewAttributeMap()),
 					vo.NewCharacter(8, vo.NewAttributeMap()),
 					vo.NewCharacter(9, vo.NewAttributeMap()),
@@ -400,7 +403,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 		{
 			name: "enemy won when ally summoner is dead",
 			fields: fields{
-				AllyMinions: &Minions{
+				AllyMinions: vo.Camp{
 					vo.NewCharacterWithSkill(1, getAttackSkillWithTarget(0), vo.NewAttributeMap()),
 					vo.NewCharacter(2, vo.NewAttributeMap()),
 					vo.NewCharacter(3, vo.NewAttributeMap()),
@@ -408,7 +411,7 @@ func Test_MinionSlot_Act(t *testing.T) {
 					vo.NewCharacter(5, vo.NewAttributeMap()),
 					vo.NewCharacter(6, vo.NewAttributeMap(vo.DeadAttribute)),
 				},
-				EnemyMinions: &Minions{
+				EnemyMinions: vo.Camp{
 					vo.NewCharacter(7, vo.NewAttributeMap()),
 					vo.NewCharacter(8, vo.NewAttributeMap()),
 					vo.NewCharacter(9, vo.NewAttributeMap()),
@@ -431,7 +434,9 @@ func Test_MinionSlot_Act(t *testing.T) {
 				calculateAttackDamageFn: tt.fields.calculateAttackDamageFn,
 				targetPickerFn:          tt.fields.targetPickerFn,
 			}
-			assert.Equalf(t, tt.wantAffects, s.act(tt.args.actorIdx), "act(%v)", tt.args.actorIdx)
+			gotAffects, err := s.act(tt.args.actorIdx)
+			assert.NoError(t, err)
+			assert.Equalf(t, tt.wantAffects, gotAffects, "act(%v)", tt.args.actorIdx)
 			assert.Equalf(t, tt.wantStatus, s.Status, "Status(%v)", tt.args.actorIdx)
 		})
 	}

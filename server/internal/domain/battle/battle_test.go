@@ -10,8 +10,8 @@ import (
 )
 
 func TestBattle_Create(t *testing.T) {
-	allyMinions := &battle.Minions{}
-	enemyMinions := &battle.Minions{}
+	allyMinions := vo.Camp{}
+	enemyMinions := vo.Camp{}
 	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
 	b, err := battle.CreateBattle("1", minionSlot)
 	assert.NoError(t, err)
@@ -29,7 +29,7 @@ func getDeadUnit(groundIdx vo.GroundIdx) vo.Character {
 }
 
 func TestBattle_FightToTheEnd_Draw(t *testing.T) {
-	allyMinions := &battle.Minions{
+	allyMinions := vo.Camp{
 		getDeadUnit(1),
 		getDeadUnit(2),
 		getDeadUnit(3),
@@ -37,7 +37,7 @@ func TestBattle_FightToTheEnd_Draw(t *testing.T) {
 		getDeadUnit(5),
 		getUndeadUnit(6),
 	}
-	enemyMinions := &battle.Minions{
+	enemyMinions := vo.Camp{
 		getDeadUnit(7),
 		getDeadUnit(8),
 		getDeadUnit(9),
@@ -56,7 +56,7 @@ func TestBattle_FightToTheEnd_Draw(t *testing.T) {
 }
 
 func TestBattle_FightToTheEnd_AllyWon(t *testing.T) {
-	allyMinions := &battle.Minions{
+	allyMinions := vo.Camp{
 		getUndeadUnit(1),
 		getDeadUnit(2),
 		getDeadUnit(3),
@@ -64,7 +64,7 @@ func TestBattle_FightToTheEnd_AllyWon(t *testing.T) {
 		getDeadUnit(5),
 		getUndeadUnit(6),
 	}
-	enemyMinions := &battle.Minions{
+	enemyMinions := vo.Camp{
 		getDeadUnit(7),
 		getDeadUnit(8),
 		getDeadUnit(9),
@@ -83,7 +83,7 @@ func TestBattle_FightToTheEnd_AllyWon(t *testing.T) {
 }
 
 func TestBattle_FightToTheEnd_AllyLost(t *testing.T) {
-	alleyMinions := &battle.Minions{
+	alleyMinions := vo.Camp{
 		getDeadUnit(1),
 		getDeadUnit(2),
 		getDeadUnit(3),
@@ -91,7 +91,7 @@ func TestBattle_FightToTheEnd_AllyLost(t *testing.T) {
 		getDeadUnit(5),
 		getDeadUnit(6),
 	}
-	enemyMinions := &battle.Minions{
+	enemyMinions := vo.Camp{
 		getUndeadUnit(7),
 		getDeadUnit(8),
 		getDeadUnit(9),

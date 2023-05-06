@@ -1,6 +1,8 @@
 package battle
 
 import (
+	"fmt"
+
 	"github.com/shopspring/decimal"
 
 	"github.com/Amobe/PlayGame/server/internal/domain/battle/calculator"
@@ -20,8 +22,8 @@ type calculateAttackDamageFn func(attacker, target vo.Character, skill vo.Skill)
 type targetPickerFn func(min, max, number int) []int
 
 type MinionSlot struct {
-	AllyMinions  *Minions
-	EnemyMinions *Minions
+	AllyMinions  vo.Camp
+	EnemyMinions vo.Camp
 	Status       MinionSlotStatus
 
 	calculateAttackDamageFn
@@ -33,7 +35,7 @@ var (
 	defaultTargetPickerFn          = targetPickerFromFirst
 )
 
-func NewMinionSlot(allyMinions, enemyMinions *Minions) *MinionSlot {
+func NewMinionSlot(allyMinions, enemyMinions vo.Camp) *MinionSlot {
 	return &MinionSlot{
 		AllyMinions:  allyMinions,
 		EnemyMinions: enemyMinions,
@@ -41,41 +43,67 @@ func NewMinionSlot(allyMinions, enemyMinions *Minions) *MinionSlot {
 	}
 }
 
-func (s *MinionSlot) PlayOneRound() []vo.Affect {
+func (s *MinionSlot) PlayOneRound() ([]vo.Affect, error) {
 	var affects []vo.Affect
-	actionOrder := s.getActionOrder()
+	actionOrder, err := s.getActionOrder()
+	if err != nil {
+		return nil, fmt.Errorf("get action order error: %w", err)
+	}
 	for _, actorIdx := range actionOrder {
-		affects = append(affects, s.act(actorIdx)...)
+		affect, err := s.act(actorIdx)
+		if err != nil {
+			return nil, fmt.Errorf("act error: %w", err)
+		}
+		affects = append(affects, affect...)
 		if s.Status != MinionSlotStatusStarted {
 			break
 		}
 	}
-	return affects
+	return affects, nil
 }
 
-func (s *MinionSlot) act(actorIdx vo.GroundIdx) []vo.Affect {
-	attacker, targets := s.getAttackerAndTargets(actorIdx)
+func (s *MinionSlot) act(actorIdx vo.GroundIdx) ([]vo.Affect, error) {
+	enemySummoner, err := s.enemySummoner()
+	if err != nil {
+		return nil, fmt.Errorf("get enemy summoner error: %w", err)
+	}
+	allySummoner, err := s.allySummoner()
+	if err != nil {
+		return nil, fmt.Errorf("get ally summoner error: %w", err)
+	}
+	attacker, targets, err := s.getAttackerAndTargets(actorIdx)
+	if err != nil {
+		return nil, fmt.Errorf("get attacker and targets error: %w", err)
+	}
 	if attacker.IsDead() {
-		return nil
+		return nil, nil
 	}
 	var affects []vo.Affect
 	for _, target := range targets {
 		affect := s.attack(attacker, target)
 		affects = append(affects, affect)
 	}
-	if s.enemySummoner().IsDead() {
+	if enemySummoner.IsDead() {
 		s.Status = MinionSlotStatusAllyWon
 	}
-	if s.allySummoner().IsDead() {
+	if allySummoner.IsDead() {
 		s.Status = MinionSlotStatusEnemyWon
 	}
-	return affects
+	return affects, nil
 }
 
-func (s *MinionSlot) getActionOrder() []vo.GroundIdx {
+func (s *MinionSlot) getActionOrder() ([]vo.GroundIdx, error) {
 	// assume ally summoner is faster than enemy summoner, action idx is starting from 1 to 5
 	startActionIdx := 1
-	if s.enemySummoner().GetAgi() > s.allySummoner().GetAgi() {
+	enemySummoner, err := s.enemySummoner()
+	if err != nil {
+		return nil, fmt.Errorf("get enemy summoner error: %w", err)
+	}
+	allySummoner, err := s.allySummoner()
+	if err != nil {
+		return nil, fmt.Errorf("get ally summoner error: %w", err)
+	}
+	if enemySummoner.GetAgi() > allySummoner.GetAgi() {
 		// if enemy summoner is faster than ally summoner, action idx is starting from 7 to 11
 		startActionIdx = 7
 	}
@@ -84,10 +112,10 @@ func (s *MinionSlot) getActionOrder() []vo.GroundIdx {
 		firstActorIdx := vo.GroundIdx(i)
 		actionOrder = append(actionOrder, firstActorIdx, firstActorIdx.GetOppositeIdx())
 	}
-	return actionOrder
+	return actionOrder, nil
 }
 
-func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker vo.Character, targets []vo.Character) {
+func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker vo.Character, targets []vo.Character, err error) {
 	getAttackerFn := s.AllyMinions.Get
 	getTargetFn := s.getTargetsFn(s.EnemyMinions)
 	if idx.IsEnemy() {
@@ -95,27 +123,36 @@ func (s *MinionSlot) getAttackerAndTargets(idx vo.GroundIdx) (attacker vo.Charac
 		getTargetFn = s.getTargetsFn(s.AllyMinions)
 	}
 
-	attacker = getAttackerFn(idx.ToCampIdx())
+	attacker, err = getAttackerFn(idx.ToCampIdx())
+	if err != nil {
+		return vo.EmptyCharacter, nil, fmt.Errorf("get attacker error: %w", err)
+	}
 	if attacker.IsDead() {
-		return attacker, nil
+		return attacker, nil, nil
 	}
 	targetNumber := int(attacker.GetSkill().AttributeMap.Get(vo.AttributeTypeTarget).Value.IntPart())
-	targets = getTargetFn(targetNumber)
-	return attacker, targets
+	targets, err = getTargetFn(targetNumber)
+	return attacker, targets, nil
 }
 
-func (s *MinionSlot) getTargetsFn(minions *Minions) func(number int) (targets []vo.Character) {
-	return func(number int) (targets []vo.Character) {
+func (s *MinionSlot) getTargetsFn(camp vo.Camp) func(number int) (targets []vo.Character, err error) {
+	return func(number int) (targets []vo.Character, err error) {
 		targets = make([]vo.Character, 0, number)
 		randIdx := s.getTargetPickerFn()(1, 5, number)
 		for _, idx := range randIdx {
-			target := minions.Get(vo.CampIdx(idx))
+			target, err := camp.Get(vo.CampIdx(idx))
+			if err != nil {
+				return nil, fmt.Errorf("get target error: %w", err)
+			}
 			if target.IsDead() {
-				target = minions.GetSummoner()
+				target, err = camp.GetSummoner()
+				if err != nil {
+					return nil, fmt.Errorf("get summoner error: %w", err)
+				}
 			}
 			targets = append(targets, target)
 		}
-		return targets
+		return targets, nil
 	}
 }
 
@@ -176,10 +213,10 @@ func (s *MinionSlot) unitTakeAffect(unit vo.Character, affects vo.AttributeMap) 
 	minionSetFn(campIDx, unit.TakeAffect(affects))
 }
 
-func (s *MinionSlot) allySummoner() vo.Character {
+func (s *MinionSlot) allySummoner() (vo.Character, error) {
 	return s.AllyMinions.GetSummoner()
 }
 
-func (s *MinionSlot) enemySummoner() vo.Character {
+func (s *MinionSlot) enemySummoner() (vo.Character, error) {
 	return s.EnemyMinions.GetSummoner()
 }

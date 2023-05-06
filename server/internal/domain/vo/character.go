@@ -6,6 +6,8 @@ import (
 	"github.com/Amobe/PlayGame/server/internal/utils"
 )
 
+var EmptyCharacter = Character{}
+
 type Character struct {
 	GroundIdx GroundIdx
 	Basement  AttributeMap

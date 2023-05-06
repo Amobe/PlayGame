@@ -81,7 +81,10 @@ func (b *Battle) FightToTheEnd() ([]vo.Affect, error) {
 }
 
 func (b *Battle) fight() ([]vo.Affect, error) {
-	affects := b.minionSlot.PlayOneRound()
+	affects, err := b.minionSlot.PlayOneRound()
+	if err != nil {
+		return nil, fmt.Errorf("play one round: %w", err)
+	}
 	if err := b.applyNew(EventBattleFought{Affects: affects}); err != nil {
 		return nil, fmt.Errorf("apply battle fought event: %w", err)
 	}
