@@ -6,7 +6,7 @@ const CampSize = 6
 
 type Camp [CampSize]Character
 
-func NewCamp(characters []Character) (Camp, error) {
+func NewCamp(characters ...Character) (Camp, error) {
 	if len(characters) > CampSize {
 		return Camp{}, fmt.Errorf("invalid characters length: %d", len(characters))
 	}

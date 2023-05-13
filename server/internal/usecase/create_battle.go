@@ -42,7 +42,7 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 
 	battleID := utils.NewUUID()
 
-	allyMinions, err := vo.NewCamp([]vo.Character{
+	allyCamp, err := vo.NewCamp(
 		vo.NewCharacterWithSkill(1, vo.SkillSlash,
 			vo.NewAttributeMap(
 				vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
@@ -54,19 +54,20 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 		vo.NewCharacter(4, vo.NewAttributeMap()),
 		vo.NewCharacter(5, vo.NewAttributeMap()),
 		vo.NewCharacter(6, vo.NewAttributeMap()),
-	})
+	)
 	if err != nil {
 		err = fmt.Errorf("new ally camp: %w", err)
 		return
 	}
 
-	enemyMinions, err := vo.NewCamp(s.Characters)
+	enemyCamp, err := vo.NewCamp(s.Characters...)
 	if err != nil {
 		err = fmt.Errorf("new enemy camp: %w", err)
 		return
 	}
 
-	minionSlot := battle.NewMinionSlot(allyMinions, enemyMinions)
+	ground := vo.NewGround(allyCamp, enemyCamp)
+	minionSlot := battle.NewMinionSlot(ground)
 	b, err := battle.CreateBattle(battleID, minionSlot)
 	if err != nil {
 		err = fmt.Errorf("create battle: %w", err)

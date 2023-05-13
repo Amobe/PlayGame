@@ -12,24 +12,24 @@ import (
 )
 
 func TestMinionsMarshaller(t *testing.T) {
-	origin, err := vo.NewCamp([]vo.Character{
+	origin, err := vo.NewCamp(
 		vo.NewCharacter(1, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(100)))),
 		vo.NewCharacter(2, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(100)))),
 		vo.NewCharacter(3, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(100)))),
 		vo.NewCharacter(4, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeDEF, decimal.NewFromInt(100)))),
 		vo.NewCharacter(5, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeDodge, decimal.NewFromInt(100)))),
 		vo.NewCharacter(6, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHit, decimal.NewFromInt(100)))),
-	})
+	)
 	require.NoError(t, err)
 	got := vo.Camp{}
-	want, err := vo.NewCamp([]vo.Character{
+	want, err := vo.NewCamp(
 		vo.NewCharacter(1, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHP, decimal.NewFromInt(100)))),
 		vo.NewCharacter(2, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeAGI, decimal.NewFromInt(100)))),
 		vo.NewCharacter(3, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(100)))),
 		vo.NewCharacter(4, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeDEF, decimal.NewFromInt(100)))),
 		vo.NewCharacter(5, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeDodge, decimal.NewFromInt(100)))),
 		vo.NewCharacter(6, vo.NewAttributeMap(vo.NewAttribute(vo.AttributeTypeHit, decimal.NewFromInt(100)))),
-	})
+	)
 	require.NoError(t, err)
 	marshalled, err := utils.MarshalToJSON(origin)
 	require.NoError(t, err)
