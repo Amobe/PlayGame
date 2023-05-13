@@ -1,6 +1,10 @@
 package vo
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Amobe/PlayGame/server/internal/utils"
+)
 
 type Ground struct {
 	Ally  Camp
@@ -100,6 +104,10 @@ func (g Ground) GetMatch(idx GroundIdx) (match Match, err error) {
 		Actor:   attacker,
 		Targets: targets,
 	}, nil
+}
+
+func (g Ground) ToString() string {
+	return utils.ToString(g)
 }
 
 // getTargetsFn returns a function to get targets from camp.

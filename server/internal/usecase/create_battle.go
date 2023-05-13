@@ -45,7 +45,7 @@ func (u *CreateBattleUsecase) Execute(in CreateBattleInput) (out CreateBattleOut
 	allyCamp, err := vo.NewCamp(
 		vo.NewCharacterWithSkill(1, vo.SkillSlash,
 			vo.NewAttributeMap(
-				vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(10)),
+				vo.NewAttribute(vo.AttributeTypeATK, decimal.NewFromInt(20)),
 				vo.NewAttribute(vo.AttributeTypeHit, decimal.NewFromInt(100)),
 			),
 		),

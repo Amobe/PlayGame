@@ -100,6 +100,10 @@ func (s *MinionSlot) attack(attacker, target vo.Character) (vo.Affect, error) {
 			Type:  vo.AttributeTypeDamage,
 			Value: damage,
 		},
+		vo.Attribute{
+			Type:  vo.AttributeTypeHP,
+			Value: damage.Neg(),
+		},
 	)
 	if err := s.unitTakeAffect(target, affects); err != nil {
 		return vo.Affect{}, fmt.Errorf("unit take affect: %w", err)
@@ -131,4 +135,8 @@ func (s *MinionSlot) unitTakeAffect(unit vo.Character, affects vo.AttributeMap) 
 	}
 	s.Ground = newGround
 	return nil
+}
+
+func (s *MinionSlot) ToString() string {
+	return fmt.Sprintf("ground: %s, status: %s", s.Ground.ToString(), s.Status)
 }

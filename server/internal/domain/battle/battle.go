@@ -130,6 +130,10 @@ func (b *Battle) apply(new bool, events ...domain.Event) error {
 	return nil
 }
 
+func (b Battle) ToString() string {
+	return fmt.Sprintf("Battle: %s, Status: %s, MinionSlot: {%s}", b.battleID, b.status, b.minionSlot.ToString())
+}
+
 type Status string
 
 const (
