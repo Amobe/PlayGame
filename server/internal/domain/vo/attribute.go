@@ -82,6 +82,7 @@ const (
 	AttributeTypeMATKB          AttributeType = "matkbonus"
 	AttributeTypePhysicalDamage AttributeType = "pd"
 	AttributeTypeMagicalDamage  AttributeType = "md"
+	AttributeTypeHybridDamage   AttributeType = "hd"
 	AttributeTypeHeal           AttributeType = "heal"
 
 	AttributeTypeDead     AttributeType = "dead"
@@ -116,6 +117,7 @@ var attributeTypeMap = map[string]AttributeType{
 	AttributeTypeMATKB.String():          AttributeTypeMATKB,
 	AttributeTypePhysicalDamage.String(): AttributeTypePhysicalDamage,
 	AttributeTypeMagicalDamage.String():  AttributeTypeMagicalDamage,
+	AttributeTypeHybridDamage.String():   AttributeTypeHybridDamage,
 	AttributeTypeHeal.String():           AttributeTypeHeal,
 	AttributeTypeDead.String():           AttributeTypeDead,
 	AttributeTypePoisoned.String():       AttributeTypePoisoned,

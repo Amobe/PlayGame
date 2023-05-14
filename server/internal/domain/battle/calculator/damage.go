@@ -12,11 +12,14 @@ type damageType string
 const (
 	damageTypePhysical damageType = "p"
 	damageTypeMagical  damageType = "m"
+	damageTypeHybrid   damageType = "h"
 )
 
 type damageAttackerAttribute struct {
 	atk         decimal.Decimal
+	atkB        decimal.Decimal
 	matk        decimal.Decimal
+	matkB       decimal.Decimal
 	skillRate   decimal.Decimal
 	amp         decimal.Decimal
 	attackerCri decimal.Decimal
@@ -29,12 +32,17 @@ type damageAttackerAttribute struct {
 
 func BuildDamageAttackerAttribute(skillAttr, characterAttr vo.AttributeMap) damageAttackerAttribute {
 	damageType := damageTypePhysical
-	if skillAttr.GetBool(vo.AttributeTypeMagicalDamage) {
+	switch {
+	case skillAttr.GetBool(vo.AttributeTypeMagicalDamage):
 		damageType = damageTypeMagical
+	case skillAttr.GetBool(vo.AttributeTypeHybridDamage):
+		damageType = damageTypeHybrid
 	}
 	return damageAttackerAttribute{
 		atk:         characterAttr.Get(vo.AttributeTypeATK).Value,
+		atkB:        skillAttr.Get(vo.AttributeTypeATKB).Value,
 		matk:        characterAttr.Get(vo.AttributeTypeMATK).Value,
+		matkB:       skillAttr.Get(vo.AttributeTypeMATKB).Value,
 		skillRate:   skillAttr.Get(vo.AttributeTypeSDR).Value,
 		amp:         characterAttr.Get(vo.AttributeTypeAMP).Value,
 		attackerCri: characterAttr.Get(vo.AttributeTypeCRI).Value,
@@ -88,17 +96,27 @@ func CalculateDamage(daa damageAttackerAttribute, dta damageTargetAttribute) (da
 }
 
 func baseDamageFactor(daa damageAttackerAttribute, dta damageTargetAttribute) decimal.Decimal {
-	atk, def := daa.atk, dta.def
-	if daa.damageType == damageTypeMagical {
-		atk, def = daa.matk, dta.mdef
+	formula := func(atk, def decimal.Decimal) decimal.Decimal {
+		numerator := atk.Mul(atk)
+		denominator := atk.Add(def.Mul(decimal.NewFromInt(2)))
+		if denominator.IsZero() {
+			return decimal.Zero
+		}
+		// (atk * atk) / (atk + 2*def)
+		return numerator.Div(denominator)
 	}
-	numerator := atk.Mul(atk)
-	denominator := atk.Add(def.Mul(decimal.NewFromInt(2)))
-	if denominator.IsZero() {
-		return decimal.Zero
+
+	atk, def := daa.atk.Mul(daa.atkB), dta.def
+	matk, mdef := daa.matk.Mul(daa.matkB), dta.mdef
+	switch daa.damageType {
+	case damageTypePhysical:
+		return formula(atk, def)
+	case damageTypeMagical:
+		return formula(matk, mdef)
+	case damageTypeHybrid:
+		return formula(atk, def).Add(formula(matk, mdef))
 	}
-	// (atk * atk) / (atk + 2*def)
-	return numerator.Div(denominator)
+	return decimal.Zero
 }
 
 func skillDamageFactor(daa damageAttackerAttribute, dta damageTargetAttribute) decimal.Decimal {
