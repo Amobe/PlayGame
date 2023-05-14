@@ -1,6 +1,10 @@
 package vo
 
-import "github.com/Amobe/PlayGame/server/internal/utils"
+import (
+	"github.com/shopspring/decimal"
+
+	"github.com/Amobe/PlayGame/server/internal/utils"
+)
 
 type AttributeMap map[AttributeType]Attribute
 
@@ -56,6 +60,10 @@ func (a AttributeMap) Get(attributeType AttributeType) Attribute {
 		return NewAttribute(attributeType, GetDefaultAttributeValue(attributeType))
 	}
 	return attr
+}
+
+func (a AttributeMap) GetBool(attributeType AttributeType) bool {
+	return a.Get(attributeType).Value.Equal(decimal.NewFromInt(1))
 }
 
 // EqualTo compares two AttributeMap

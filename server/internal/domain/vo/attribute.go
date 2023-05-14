@@ -14,6 +14,13 @@ func NewAttribute(attrType AttributeType, value decimal.Decimal) Attribute {
 	}
 }
 
+func NewBoolAttribute(attrType AttributeType, value bool) Attribute {
+	if value {
+		return NewAttribute(attrType, decimal.NewFromInt(1))
+	}
+	return NewAttribute(attrType, decimal.NewFromInt(0))
+}
+
 func (a Attribute) Add(value decimal.Decimal) Attribute {
 	return NewAttribute(a.Type, a.Value.Add(value))
 }
@@ -68,44 +75,50 @@ const (
 	AttributeTypeDodge    AttributeType = "dodge"
 	AttributeTypeDamage   AttributeType = "damage"
 	// skill attributes
-	AttributeTypeTarget AttributeType = "target"
-	AttributeTypeCD     AttributeType = "cd"
-	AttributeTypeFCD    AttributeType = "firstcd"
-	AttributeTypeATKB   AttributeType = "atkbonus"
-	AttributeTypeMATKB  AttributeType = "matkbonus"
+	AttributeTypeTarget         AttributeType = "target"
+	AttributeTypeCD             AttributeType = "cd"
+	AttributeTypeFCD            AttributeType = "firstcd"
+	AttributeTypeATKB           AttributeType = "atkbonus"
+	AttributeTypeMATKB          AttributeType = "matkbonus"
+	AttributeTypePhysicalDamage AttributeType = "pd"
+	AttributeTypeMagicalDamage  AttributeType = "md"
+	AttributeTypeHeal           AttributeType = "heal"
 
 	AttributeTypeDead     AttributeType = "dead"
 	AttributeTypePoisoned AttributeType = "poisoned"
 )
 
 var attributeTypeMap = map[string]AttributeType{
-	AttributeTypeHP.String():       AttributeTypeHP,
-	AttributeTypeAGI.String():      AttributeTypeAGI,
-	AttributeTypeATK.String():      AttributeTypeATK,
-	AttributeTypeDEF.String():      AttributeTypeDEF,
-	AttributeTypeMATK.String():     AttributeTypeMATK,
-	AttributeTypeMDEF.String():     AttributeTypeMDEF,
-	AttributeTypeCRI.String():      AttributeTypeCRI,
-	AttributeTypeCRIR.String():     AttributeTypeCRIR,
-	AttributeTypeCRID.String():     AttributeTypeCRID,
-	AttributeTypeCRIDR.String():    AttributeTypeCRIDR,
-	AttributeTypeAMP.String():      AttributeTypeAMP,
-	AttributeTypeAMPR.String():     AttributeTypeAMPR,
-	AttributeTypeStatusH.String():  AttributeTypeStatusH,
-	AttributeTypeStatusHR.String(): AttributeTypeStatusHR,
-	AttributeTypeDI.String():       AttributeTypeDI,
-	AttributeTypeDR.String():       AttributeTypeDR,
-	AttributeTypeSDR.String():      AttributeTypeSDR,
-	AttributeTypeHR.String():       AttributeTypeHR,
-	AttributeTypeHit.String():      AttributeTypeHit,
-	AttributeTypeDodge.String():    AttributeTypeDodge,
-	AttributeTypeTarget.String():   AttributeTypeTarget,
-	AttributeTypeCD.String():       AttributeTypeCD,
-	AttributeTypeFCD.String():      AttributeTypeFCD,
-	AttributeTypeATKB.String():     AttributeTypeATKB,
-	AttributeTypeMATKB.String():    AttributeTypeMATKB,
-	AttributeTypeDead.String():     AttributeTypeDead,
-	AttributeTypePoisoned.String(): AttributeTypePoisoned,
+	AttributeTypeHP.String():             AttributeTypeHP,
+	AttributeTypeAGI.String():            AttributeTypeAGI,
+	AttributeTypeATK.String():            AttributeTypeATK,
+	AttributeTypeDEF.String():            AttributeTypeDEF,
+	AttributeTypeMATK.String():           AttributeTypeMATK,
+	AttributeTypeMDEF.String():           AttributeTypeMDEF,
+	AttributeTypeCRI.String():            AttributeTypeCRI,
+	AttributeTypeCRIR.String():           AttributeTypeCRIR,
+	AttributeTypeCRID.String():           AttributeTypeCRID,
+	AttributeTypeCRIDR.String():          AttributeTypeCRIDR,
+	AttributeTypeAMP.String():            AttributeTypeAMP,
+	AttributeTypeAMPR.String():           AttributeTypeAMPR,
+	AttributeTypeStatusH.String():        AttributeTypeStatusH,
+	AttributeTypeStatusHR.String():       AttributeTypeStatusHR,
+	AttributeTypeDI.String():             AttributeTypeDI,
+	AttributeTypeDR.String():             AttributeTypeDR,
+	AttributeTypeSDR.String():            AttributeTypeSDR,
+	AttributeTypeHR.String():             AttributeTypeHR,
+	AttributeTypeHit.String():            AttributeTypeHit,
+	AttributeTypeDodge.String():          AttributeTypeDodge,
+	AttributeTypeTarget.String():         AttributeTypeTarget,
+	AttributeTypeCD.String():             AttributeTypeCD,
+	AttributeTypeFCD.String():            AttributeTypeFCD,
+	AttributeTypeATKB.String():           AttributeTypeATKB,
+	AttributeTypeMATKB.String():          AttributeTypeMATKB,
+	AttributeTypePhysicalDamage.String(): AttributeTypePhysicalDamage,
+	AttributeTypeMagicalDamage.String():  AttributeTypeMagicalDamage,
+	AttributeTypeHeal.String():           AttributeTypeHeal,
+	AttributeTypeDead.String():           AttributeTypeDead,
+	AttributeTypePoisoned.String():       AttributeTypePoisoned,
 }
 
 var defaultAttributeValue = map[AttributeType]decimal.Decimal{}

@@ -30,7 +30,7 @@ func weaponDataToDomain(data configData) (vo.Weapon, error) {
 			return vo.Weapon{}, fmt.Errorf("unrecognized weapon data field %s", k)
 		}
 	}
-	return vo.NewWeapon(id, weaponType, weaponName, weaponSkill, attributes)
+	return vo.NewWeapon(id, weaponType, weaponName, vo.NewSkill(weaponSkill, vo.NewAttributeMap()), attributes)
 }
 
 //func skillDataToDomain(data configData) (vo.Skill, error) {

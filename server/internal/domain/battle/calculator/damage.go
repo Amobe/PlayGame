@@ -28,6 +28,10 @@ type damageAttackerAttribute struct {
 }
 
 func BuildDamageAttackerAttribute(skillAttr, characterAttr vo.AttributeMap) damageAttackerAttribute {
+	damageType := damageTypePhysical
+	if skillAttr.GetBool(vo.AttributeTypeMagicalDamage) {
+		damageType = damageTypeMagical
+	}
 	return damageAttackerAttribute{
 		atk:         characterAttr.Get(vo.AttributeTypeATK).Value,
 		matk:        characterAttr.Get(vo.AttributeTypeMATK).Value,
@@ -38,7 +42,7 @@ func BuildDamageAttackerAttribute(skillAttr, characterAttr vo.AttributeMap) dama
 		criD:        characterAttr.Get(vo.AttributeTypeCRID).Value,
 		di:          characterAttr.Get(vo.AttributeTypeDI).Value,
 		hit:         characterAttr.Get(vo.AttributeTypeHit).Value,
-		damageType:  damageTypePhysical,
+		damageType:  damageType,
 	}
 }
 
@@ -113,15 +117,15 @@ func randDamageFactor() decimal.Decimal {
 func criticalDamageFactor(daa damageAttackerAttribute, dta damageTargetAttribute) decimal.Decimal {
 	var (
 		BaseFactor    = decimal.NewFromInt(1)
-		MininumFactor = decimal.NewFromFloat(1.25)
+		MinimumFactor = decimal.NewFromFloat(1.25)
 	)
 
 	if !isCritical(daa.attackerCri, dta.criR, daa.skillCri) {
 		return BaseFactor
 	}
 	criticalFactor := BaseFactor.Add(daa.criD).Sub(dta.criDR)
-	if criticalFactor.LessThan(MininumFactor) {
-		return MininumFactor
+	if criticalFactor.LessThan(MinimumFactor) {
+		return MinimumFactor
 	}
 	return criticalFactor
 }
