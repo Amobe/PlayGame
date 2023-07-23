@@ -30,6 +30,19 @@ func GenerateToken(ttl time.Duration, payload TokenPayload, secretJWTKey string)
 	return tokenString, nil
 }
 
+func ValidateToken(token string, secretJWTKey string) (TokenPayload, error) {
+	jwtToken, err := jwt.Parse(token, func(jwtToken *jwt.Token) (interface{}, error) {
+		if _, ok := jwtToken.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected method: %s", jwtToken.Header["alg"])
+		}
+		return []byte(secretJWTKey), nil
+	})
+	if err != nil {
+		return TokenPayload{}, fmt.Errorf("parse token: %w", err)
+	}
+	return RetrieveTokenPayload(jwtToken)
+}
+
 func RetrieveTokenPayload(token interface{}) (TokenPayload, error) {
 	jwtToken, ok := token.(*jwt.Token)
 	if !ok {

@@ -21,11 +21,7 @@ func NewCurrentUserHandler(repoDeps FiberServerRepoDeps) *CurrentUserHandler {
 }
 
 func (h *CurrentUserHandler) FiberHandleCurrentUser(ctx *fiber.Ctx) error {
-	token := ctx.Locals(FiberContextKeyToken)
-	tokenPayload, err := utils.RetrieveTokenPayload(token)
-	if err != nil {
-		return fmt.Errorf("retrieve token payload: %w", err)
-	}
+	tokenPayload := ctx.Locals(FiberLocalKeyTokenPayload).(utils.TokenPayload)
 	accountEntity, err := h.handleCurrentUser(ctx.Context(), tokenPayload.AccountID)
 	if err != nil {
 		return fmt.Errorf("handle current user: %w", err)

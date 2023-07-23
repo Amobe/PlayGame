@@ -3,6 +3,7 @@ package gamehttp
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/exp/slog"
@@ -66,6 +67,12 @@ func (o *OAuthGoogleHandler) FiberHandleOAuthCallback(ctx *fiber.Ctx) error {
 	resp := fiber.Map{
 		"token": jwtToken,
 	}
+	ctx.Cookie(&fiber.Cookie{
+		Name:     FiberCookieKeyToken,
+		Value:    jwtToken,
+		HTTPOnly: true,
+		Expires:  time.Now().Add(o.tokenConfig.ExpiredIn),
+	})
 	return ctx.JSON(resp)
 }
 

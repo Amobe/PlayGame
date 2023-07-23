@@ -3,8 +3,8 @@ package gamehttp
 import (
 	"net"
 
-	fjwt "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	fcookie "github.com/gofiber/fiber/v2/middleware/encryptcookie"
 	flogger "github.com/gofiber/fiber/v2/middleware/logger"
 
 	"github.com/Amobe/PlayGame/server/internal/domain/account"
@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	FiberContextKeyToken = "token"
+	FiberCookieKeyToken       = "token"
+	FiberLocalKeyTokenPayload = "token_payload"
 )
 
 type FiberServerConfigDeps interface {
@@ -36,13 +37,10 @@ func NewFiberServer(
 ) *FiberServer {
 	server := fiber.New()
 	server.Use(flogger.New())
-	server.Use(fjwt.New(fjwt.Config{
-		ContextKey: FiberContextKeyToken,
-		Filter:     jwtRouteFilter,
-		SigningKey: fjwt.SigningKey{
-			Key: []byte(configDeps.TokenConfig().JWTSecret),
-		},
+	server.Use(fcookie.New(fcookie.Config{
+		Key: "AA07249FBB99ACF4BD5C6877B2C65C7A",
 	}))
+	server.Use(newFiberMiddlewareJWT(configDeps))
 
 	server.Get("/healthcheck", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("OK")
@@ -62,18 +60,4 @@ func NewFiberServer(
 
 func (s *FiberServer) Serve(listener net.Listener) error {
 	return s.server.Listener(listener)
-}
-
-var routePathSkipJWT = map[string]interface{}{
-	"/healthcheck":          nil,
-	"/oauth/google":         nil,
-	"/auth/google/callback": nil,
-}
-
-func jwtRouteFilter(ctx *fiber.Ctx) bool {
-	// Skip jwt authentication if route is in routePathSkipJWT.
-	if _, ok := routePathSkipJWT[ctx.Path()]; ok {
-		return true
-	}
-	return false
 }
