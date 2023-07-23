@@ -7,8 +7,10 @@ import (
 
 const sampleSize = 10000000000
 
+var r *rand.Rand
+
 func init() {
-	rand.Seed(time.Now().UnixNano())
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
 func GetProbabilitySampling(rate float64) bool {
@@ -18,15 +20,15 @@ func GetProbabilitySampling(rate float64) bool {
 	if rate >= 1 {
 		return true
 	}
-	return rand.Intn(sampleSize) <= int(rate*sampleSize)
+	return r.Intn(sampleSize) <= int(rate*sampleSize)
 }
 
 func GetRandFloatInRange(min, max float64) float64 {
-	return min + rand.Float64()*(max-min)
+	return min + r.Float64()*(max-min)
 }
 
 func GetRandIntInRange(min, max int) int {
-	return min + rand.Intn(max-min)
+	return min + r.Intn(max-min)
 }
 
 func GetRandIntInRangeN(min, max, n int) []int {

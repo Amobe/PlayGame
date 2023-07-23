@@ -1,6 +1,6 @@
-FROM --platform=$BUILDPLATFORM golang:1.19-alpine3.17 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.20-alpine3.17 AS builder
 ENV GO111MODULE=on CGO_ENABLED=0
-RUN go install honnef.co/go/tools/cmd/staticcheck@v0.3.3
+RUN go install honnef.co/go/tools/cmd/staticcheck@v0.4.3
 WORKDIR /workspace/PlayGame/server
 COPY go.mod go.sum ./
 RUN go mod download
