@@ -10,12 +10,16 @@ services:
       DB_USER: gorm
       DB_PASS: ${DB_PASS}
       DB_NAME: game_db
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      GOOGLE_OAUTH_REDIRECT_URL: ${GOOGLE_OAUTH_REDIRECT_URL}
     networks:
       - game_app_network
     links:
       - db:dbsql-server
     ports:
       - "8080:8080"
+      - "8081:8081"
       - "4000:4000"
   db:
     restart: always
