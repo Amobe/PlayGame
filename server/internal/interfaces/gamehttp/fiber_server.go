@@ -11,6 +11,10 @@ import (
 	"github.com/Amobe/PlayGame/server/internal/infra/config"
 )
 
+const (
+	FiberContextKeyToken = "token"
+)
+
 type FiberServerConfigDeps interface {
 	GoogleAuthConfig() config.GoogleAuth
 	TokenConfig() config.Token
@@ -33,7 +37,7 @@ func NewFiberServer(
 	server := fiber.New()
 	server.Use(flogger.New())
 	server.Use(fjwt.New(fjwt.Config{
-		ContextKey: "account_id",
+		ContextKey: FiberContextKeyToken,
 		Filter:     jwtRouteFilter,
 		SigningKey: fjwt.SigningKey{
 			Key: []byte(configDeps.TokenConfig().JWTSecret),
@@ -47,6 +51,9 @@ func NewFiberServer(
 	oAuthGoogleHandler := NewOAuthGoogleHandler(configDeps, repoDeps)
 	server.Get("/oauth/google", oAuthGoogleHandler.FiberHandleOAuth)
 	server.Get("/auth/google/callback", oAuthGoogleHandler.FiberHandleOAuthCallback)
+
+	currentUserHandler := NewCurrentUserHandler(repoDeps)
+	server.Get("/session/user", currentUserHandler.FiberHandleCurrentUser)
 
 	return &FiberServer{
 		server: server,
