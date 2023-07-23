@@ -3,6 +3,7 @@ package gamehttp
 import (
 	"net"
 
+	fjwt "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	flogger "github.com/gofiber/fiber/v2/middleware/logger"
 
@@ -12,6 +13,7 @@ import (
 
 type FiberServerConfigDeps interface {
 	GoogleAuthConfig() config.GoogleAuth
+	TokenConfig() config.Token
 }
 
 type FiberServerRepoDeps interface {
@@ -30,6 +32,13 @@ func NewFiberServer(
 ) *FiberServer {
 	server := fiber.New()
 	server.Use(flogger.New())
+	server.Use(fjwt.New(fjwt.Config{
+		ContextKey: "account_id",
+		Filter:     jwtRouteFilter,
+		SigningKey: fjwt.SigningKey{
+			Key: []byte(configDeps.TokenConfig().JWTSecret),
+		},
+	}))
 
 	server.Get("/healthcheck", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("OK")
@@ -46,4 +55,18 @@ func NewFiberServer(
 
 func (s *FiberServer) Serve(listener net.Listener) error {
 	return s.server.Listener(listener)
+}
+
+var routePathSkipJWT = map[string]interface{}{
+	"/healthcheck":          nil,
+	"/oauth/google":         nil,
+	"/auth/google/callback": nil,
+}
+
+func jwtRouteFilter(ctx *fiber.Ctx) bool {
+	// Skip jwt authentication if route is in routePathSkipJWT.
+	if _, ok := routePathSkipJWT[ctx.Path()]; ok {
+		return true
+	}
+	return false
 }

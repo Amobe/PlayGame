@@ -10,11 +10,14 @@ import (
 	"golang.org/x/oauth2/google"
 
 	"github.com/Amobe/PlayGame/server/internal/domain/account"
+	"github.com/Amobe/PlayGame/server/internal/infra/config"
 	"github.com/Amobe/PlayGame/server/internal/usecase"
+	"github.com/Amobe/PlayGame/server/internal/utils"
 )
 
 type OAuthGoogleHandler struct {
 	oAuthConfig     *oauth2.Config
+	tokenConfig     config.Token
 	googleRepo      GoogleRepository
 	createAccountUC *usecase.CreateAccountUseCase
 }
@@ -38,6 +41,7 @@ func NewOAuthGoogleHandler(
 			},
 			Endpoint: google.Endpoint,
 		},
+		tokenConfig:     configDeps.TokenConfig(),
 		googleRepo:      googleRepo,
 		createAccountUC: usecase.NewCreateAccountUseCase(accountRepo, accountProviderRepo),
 	}
@@ -54,20 +58,23 @@ func (o *OAuthGoogleHandler) handleOAuth(ctx context.Context) string {
 
 func (o *OAuthGoogleHandler) FiberHandleOAuthCallback(ctx *fiber.Ctx) error {
 	code := ctx.Query("code")
-	profile, err := o.handleOAuthCallback(ctx.Context(), code)
+	jwtToken, err := o.handleOAuthCallback(ctx.Context(), code)
 	if err != nil {
 		slog.Error("handle oauth callback", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
-	return ctx.JSON(profile)
+	resp := fiber.Map{
+		"token": jwtToken,
+	}
+	return ctx.JSON(resp)
 }
 
 func (o *OAuthGoogleHandler) handleOAuthCallback(ctx context.Context, code string) (string, error) {
-	token, err := o.oAuthConfig.Exchange(ctx, code)
+	oAuthToken, err := o.oAuthConfig.Exchange(ctx, code)
 	if err != nil {
 		return "", fmt.Errorf("exchange code to token: %w", err)
 	}
-	profile, err := o.googleRepo.GetUserInformation(token.AccessToken)
+	profile, err := o.googleRepo.GetUserInformation(oAuthToken.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("get user information: %w", err)
 	}
@@ -81,5 +88,13 @@ func (o *OAuthGoogleHandler) handleOAuthCallback(ctx context.Context, code strin
 	if err != nil {
 		return "", fmt.Errorf("create account: %w", err)
 	}
-	return out.AccountID, nil
+	payload := utils.TokenPayload{
+		AccountID: out.AccountID,
+		Name:      profile.Name,
+	}
+	token, err := utils.GenerateToken(o.tokenConfig.ExpiredIn, payload, o.tokenConfig.JWTSecret)
+	if err != nil {
+		return "", fmt.Errorf("generate token: %w", err)
+	}
+	return token, nil
 }

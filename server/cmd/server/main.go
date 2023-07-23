@@ -47,6 +47,11 @@ func run() error {
 		return fmt.Errorf("listen on %s: %w", httpListenOn, err)
 	}
 
+	tokenConfig, err := config.LoadTokenConfig()
+	if err != nil {
+		return fmt.Errorf("load token config: %w", err)
+	}
+
 	dbConfig, err := database.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("load database config: %w", err)
@@ -80,6 +85,7 @@ func run() error {
 	configDeps := configDeps{
 		serverConfig:     serverConfig,
 		googleAuthConfig: googleAuthConfig,
+		tokenConfig:      tokenConfig,
 	}
 
 	repoDeps := repoDeps{
@@ -132,6 +138,7 @@ func run() error {
 type configDeps struct {
 	serverConfig     config.Server
 	googleAuthConfig config.GoogleAuth
+	tokenConfig      config.Token
 }
 
 func (c configDeps) ServerConfig() config.Server {
@@ -140,6 +147,10 @@ func (c configDeps) ServerConfig() config.Server {
 
 func (c configDeps) GoogleAuthConfig() config.GoogleAuth {
 	return c.googleAuthConfig
+}
+
+func (c configDeps) TokenConfig() config.Token {
+	return c.tokenConfig
 }
 
 type repoDeps struct {
