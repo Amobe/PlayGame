@@ -42,13 +42,6 @@
     "skill": "skill_10006"
   },
   {
-    "id": "weapon_7",
-    "type": "orb",
-    "rarity": "normal",
-    "name": "basic_orb",
-    "skill": "skill_10007"
-  },
-  {
     "id": "weapon_8",
     "type": "book",
     "rarity": "normal",
