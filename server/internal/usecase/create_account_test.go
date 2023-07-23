@@ -63,7 +63,7 @@ func (f *fakeAccountProviderRepository) Save(ctx context.Context, a *account.Acc
 func testCreateAccountUseCase_Execute_DuplicatedEmail(t *testing.T) {
 	// create a use case with fake account repository
 	// the repository will return an account without error
-	// in this case, the use case should return an account existed error
+	// in this case, the use case should return an existed account instead of create a new one.
 	uc := CreateAccountUseCase{
 		accountRepository: &fakeAccountRepository{
 			getByEmailFn: func(ctx context.Context, email string) (*account.Account, error) {
@@ -74,8 +74,9 @@ func testCreateAccountUseCase_Execute_DuplicatedEmail(t *testing.T) {
 		},
 		accountProviderRepository: nil,
 	}
-	_, err := uc.Execute(context.Background(), CreateAccountIn{})
-	assert.EqualError(t, err, "account already exists")
+	out, err := uc.Execute(context.Background(), CreateAccountIn{})
+	assert.NoError(t, err)
+	assert.Equal(t, "fake-id", out.AccountID)
 }
 
 func testCreateAccountUseCase_Execute_Success(t *testing.T) {

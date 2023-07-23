@@ -37,8 +37,10 @@ func NewCreateAccountUseCase(
 }
 
 func (u *CreateAccountUseCase) Execute(ctx context.Context, in CreateAccountIn) (CreateAccountOut, error) {
-	if _, err := u.accountRepository.GetByEmail(ctx, in.Email); err == nil {
-		return CreateAccountOut{}, fmt.Errorf("account already exists")
+	if existedAccount, err := u.accountRepository.GetByEmail(ctx, in.Email); err == nil {
+		return CreateAccountOut{
+			AccountID: existedAccount.ID,
+		}, nil
 	} else if !errors.Is(err, account.ErrAccountNotFound) {
 		return CreateAccountOut{}, fmt.Errorf("account repository get by email: %w", err)
 	}
