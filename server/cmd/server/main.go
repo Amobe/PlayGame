@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 
 	gamev1 "github.com/Amobe/PlayGame/server/gen/proto/go/game/v1"
+	"github.com/Amobe/PlayGame/server/internal/domain/account"
 	"github.com/Amobe/PlayGame/server/internal/domain/battle"
 	"github.com/Amobe/PlayGame/server/internal/domain/stage"
 	"github.com/Amobe/PlayGame/server/internal/infra/config"
@@ -60,15 +61,33 @@ func run() error {
 		return fmt.Errorf("new battle gorm repository: %w", err)
 	}
 
+	accountRepo, err := database.NewAccountRepository(dbClient)
+	if err != nil {
+		return fmt.Errorf("new account repository: %w", err)
+	}
+
+	accountProviderRepo, err := database.NewAccountProviderRepository(dbClient)
+	if err != nil {
+		return fmt.Errorf("new account provider repository: %w", err)
+	}
+
 	googleAuthConfig, err := config.LoadGoogleAuthConfig()
 	if err != nil {
 		return fmt.Errorf("load google auth config: %w", err)
 	}
 	googleClient := google.NewClient()
 
-	deps := deps{
-		stageRepo:  inmem.NewInmemStageRepository(),
-		battleRepo: battleGormRepo,
+	configDeps := configDeps{
+		serverConfig:     serverConfig,
+		googleAuthConfig: googleAuthConfig,
+	}
+
+	repoDeps := repoDeps{
+		stageRepo:           inmem.NewInmemStageRepository(),
+		battleRepo:          battleGormRepo,
+		accountRepo:         accountRepo,
+		accountProviderRepo: accountProviderRepo,
+		googleRepo:          googleClient,
 	}
 
 	var wg sync.WaitGroup
@@ -79,7 +98,7 @@ func run() error {
 	go func() {
 		slog.Info("Listening grpc on %s", listenOn)
 		grpcServer := grpc.NewServer()
-		handler := gamegrpc.NewGameServiceHandler(deps)
+		handler := gamegrpc.NewGameServiceHandler(repoDeps)
 		gamev1.RegisterGameServiceServer(grpcServer, handler)
 		if err := grpcServer.Serve(listener); err != nil {
 			errCh <- fmt.Errorf("serve gRPC server: %w", err)
@@ -89,7 +108,7 @@ func run() error {
 
 	go func() {
 		slog.Info("Listening http on %s", httpListenOn)
-		httpServer := gamehttp.NewFiberServer(serverConfig, googleAuthConfig, googleClient)
+		httpServer := gamehttp.NewFiberServer(configDeps, repoDeps)
 		if err := httpServer.Serve(httpListener); err != nil {
 			errCh <- fmt.Errorf("serve http server: %w", err)
 		}
@@ -110,15 +129,44 @@ func run() error {
 	return nil
 }
 
-type deps struct {
-	stageRepo  stage.Repository
-	battleRepo battle.Repository
+type configDeps struct {
+	serverConfig     config.Server
+	googleAuthConfig config.GoogleAuth
 }
 
-func (d deps) StageRepo() stage.Repository {
-	return d.stageRepo
+func (c configDeps) ServerConfig() config.Server {
+	return c.serverConfig
 }
 
-func (d deps) BattleRepo() battle.Repository {
-	return d.battleRepo
+func (c configDeps) GoogleAuthConfig() config.GoogleAuth {
+	return c.googleAuthConfig
+}
+
+type repoDeps struct {
+	stageRepo           stage.Repository
+	battleRepo          battle.Repository
+	accountRepo         account.Repository
+	accountProviderRepo account.ProviderRepository
+
+	googleRepo gamehttp.GoogleRepository
+}
+
+func (r repoDeps) StageRepo() stage.Repository {
+	return r.stageRepo
+}
+
+func (r repoDeps) BattleRepo() battle.Repository {
+	return r.battleRepo
+}
+
+func (r repoDeps) AccountRepo() account.Repository {
+	return r.accountRepo
+}
+
+func (r repoDeps) AccountProviderRepo() account.ProviderRepository {
+	return r.accountProviderRepo
+}
+
+func (r repoDeps) GoogleRepo() gamehttp.GoogleRepository {
+	return r.googleRepo
 }

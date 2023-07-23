@@ -1,4 +1,7 @@
 
+verify:
+	go vet ./... && staticcheck ./... && go test ./...
+
 docker.build:
 	docker buildx build --platform linux/arm64/v8 -t playgame/server:latest .
 

@@ -9,18 +9,24 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	"github.com/Amobe/PlayGame/server/internal/infra/config"
+	"github.com/Amobe/PlayGame/server/internal/domain/account"
+	"github.com/Amobe/PlayGame/server/internal/usecase"
 )
 
 type OAuthGoogleHandler struct {
-	oAuthConfig *oauth2.Config
-	googleRepo  GoogleRepository
+	oAuthConfig     *oauth2.Config
+	googleRepo      GoogleRepository
+	createAccountUC *usecase.CreateAccountUseCase
 }
 
 func NewOAuthGoogleHandler(
-	googleAuthConfig config.GoogleAuth,
-	googleRepo GoogleRepository,
+	configDeps FiberServerConfigDeps,
+	repoDeps FiberServerRepoDeps,
 ) *OAuthGoogleHandler {
+	googleAuthConfig := configDeps.GoogleAuthConfig()
+	googleRepo := repoDeps.GoogleRepo()
+	accountRepo := repoDeps.AccountRepo()
+	accountProviderRepo := repoDeps.AccountProviderRepo()
 	return &OAuthGoogleHandler{
 		oAuthConfig: &oauth2.Config{
 			ClientID:     googleAuthConfig.ClientID,
@@ -32,7 +38,8 @@ func NewOAuthGoogleHandler(
 			},
 			Endpoint: google.Endpoint,
 		},
-		googleRepo: googleRepo,
+		googleRepo:      googleRepo,
+		createAccountUC: usecase.NewCreateAccountUseCase(accountRepo, accountProviderRepo),
 	}
 }
 
@@ -55,14 +62,24 @@ func (o *OAuthGoogleHandler) FiberHandleOAuthCallback(ctx *fiber.Ctx) error {
 	return ctx.JSON(profile)
 }
 
-func (o *OAuthGoogleHandler) handleOAuthCallback(ctx context.Context, code string) (*UserInformation, error) {
+func (o *OAuthGoogleHandler) handleOAuthCallback(ctx context.Context, code string) (string, error) {
 	token, err := o.oAuthConfig.Exchange(ctx, code)
 	if err != nil {
-		return nil, fmt.Errorf("exchange code to token: %w", err)
+		return "", fmt.Errorf("exchange code to token: %w", err)
 	}
 	profile, err := o.googleRepo.GetUserInformation(token.AccessToken)
 	if err != nil {
-		return nil, fmt.Errorf("get user information: %w", err)
+		return "", fmt.Errorf("get user information: %w", err)
 	}
-	return profile, nil
+	in := usecase.CreateAccountIn{
+		Name:         profile.Name,
+		Email:        profile.Email,
+		ProviderType: account.ProviderTypeGoogle,
+		ExternalID:   profile.ID,
+	}
+	out, err := o.createAccountUC.Execute(ctx, in)
+	if err != nil {
+		return "", fmt.Errorf("create account: %w", err)
+	}
+	return out.AccountID, nil
 }
