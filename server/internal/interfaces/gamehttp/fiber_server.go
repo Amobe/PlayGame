@@ -8,6 +8,8 @@ import (
 	flogger "github.com/gofiber/fiber/v2/middleware/logger"
 
 	"github.com/Amobe/PlayGame/server/internal/domain/account"
+	"github.com/Amobe/PlayGame/server/internal/domain/battle"
+	"github.com/Amobe/PlayGame/server/internal/domain/stage"
 	"github.com/Amobe/PlayGame/server/internal/infra/config"
 )
 
@@ -24,6 +26,8 @@ type FiberServerConfigDeps interface {
 type FiberServerRepoDeps interface {
 	AccountRepo() account.Repository
 	AccountProviderRepo() account.ProviderRepository
+	StageRepo() stage.Repository
+	BattleRepo() battle.Repository
 	GoogleRepo() GoogleRepository
 }
 
@@ -52,6 +56,11 @@ func NewFiberServer(
 
 	currentUserHandler := NewCurrentUserHandler(repoDeps)
 	server.Get("/session/user", currentUserHandler.FiberHandleCurrentUser)
+
+	battleHandler := NewBattleHandler(repoDeps)
+	server.Get("/battle/:battle_id", battleHandler.FiberHandleGetBattle)
+	server.Post("/battle", battleHandler.FiberHandleCreateBattle)
+	server.Post("/battle/:battle_id/fight", battleHandler.FiberHandleFight)
 
 	return &FiberServer{
 		server: server,
