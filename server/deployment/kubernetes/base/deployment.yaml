@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
         - name: game-app
-          image: asia-east1-docker.pkg.dev/playgame-373510/playgame/server:latest
+          image: asia-east1-docker.pkg.dev/playgame-373510/playgame/server:latest-k8s
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 8081
               protocol: TCP
           resources:
             requests:
@@ -26,3 +26,6 @@ spec:
             limits:
               cpu: "50m"
               memory: "100Mi"
+          envFrom:
+            - secretRef:
+                name: service-env
