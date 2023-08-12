@@ -1,0 +1,12 @@
+[
+  {
+    "op": "add",
+    "path": "/spec/tls/0/hosts/0",
+    "value": "playgame.lbg.tw"
+  },
+  {
+    "op": "add",
+    "path": "/spec/rules/0/host",
+    "value": "playgame.lbg.tw"
+  }
+]

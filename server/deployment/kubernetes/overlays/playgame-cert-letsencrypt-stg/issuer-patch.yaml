@@ -1,0 +1,3 @@
+- op: add
+  path: /spec/acme/email
+  value: amobe.momoko@gmail.com

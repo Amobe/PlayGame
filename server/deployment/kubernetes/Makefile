@@ -8,3 +8,16 @@ apply.ingress:
 
 apply.tls:
 	kubectl create secret tls playgame-tls-secret --cert=overlays/prod/ca.crt --key=overlays/prod/ca.key
+
+apply.cert-manager:
+	#kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.3/cert-manager.crds.yaml
+	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.3/cert-manager.yaml
+
+create.ip:
+	gcloud compute addresses create playgame-staging-prod --global
+
+grant.permission:
+	kubectl create clusterrolebinding cluster-admin-binding \
+        --clusterrole=cluster-admin \
+        --user=$(gcloud config get-value core/account)
+

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: playgame-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend-deployment
+      app: playgame
   template:
     metadata:
       labels:
-        app: frontend-deployment
+        app: playgame
     spec:
       containers:
-        - name: game-app
+        - name: playgame-app
           image: asia-east1-docker.pkg.dev/playgame-373510/playgame/server:latest-k8s
           ports:
             - name: http
