@@ -7,7 +7,8 @@ import (
 )
 
 var routePathSkipJWT = map[string]interface{}{
-	"/healthcheck":          nil,
+	"/health":               nil,
+	"/health/":              nil,
 	"/oauth/google":         nil,
 	"/auth/google/callback": nil,
 }
