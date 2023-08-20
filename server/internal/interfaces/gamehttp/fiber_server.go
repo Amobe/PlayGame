@@ -46,7 +46,10 @@ func NewFiberServer(
 	}))
 	server.Use(newFiberMiddlewareJWT(configDeps))
 
-	server.Get("/healthcheck", func(ctx *fiber.Ctx) error {
+	server.Get("/health", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("OK")
+	})
+	server.Get("/health/", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("OK")
 	})
 
